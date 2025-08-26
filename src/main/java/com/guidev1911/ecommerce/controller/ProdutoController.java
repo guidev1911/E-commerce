@@ -1,5 +1,6 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,27 +19,29 @@ public class ProdutoController {
     private ProdutoService produtoService;
 
     @GetMapping
-    public ResponseEntity<List<Produto>> listarTodos() {
+    public ResponseEntity<List<ProdutoDTO>> listarTodos() {
         return ResponseEntity.ok(produtoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(produtoService.buscarPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Produto> criar(@Validated @RequestBody Produto produto) {
-        Produto novoProduto = produtoService.criar(produto);
-        return new ResponseEntity<>(novoProduto, HttpStatus.CREATED);
+    public ResponseEntity<ProdutoDTO> criar(@RequestBody ProdutoDTO produtoDTO) {
+        ProdutoDTO novo = produtoService.criar(produtoDTO);
+        return new ResponseEntity<>(novo, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @Validated @RequestBody Produto produto) {
+    public ResponseEntity<ProdutoDTO> atualizar(@PathVariable Long id, @RequestBody ProdutoDTO produtoDTO) {
         try {
-            Produto atualizado = produtoService.atualizar(id, produto);
+            ProdutoDTO atualizado = produtoService.atualizar(id, produtoDTO);
             return ResponseEntity.ok(atualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

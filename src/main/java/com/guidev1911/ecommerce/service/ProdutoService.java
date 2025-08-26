@@ -1,12 +1,13 @@
 package com.guidev1911.ecommerce.service;
 
+import com.guidev1911.ecommerce.dto.ProdutoDTO;
+import com.guidev1911.ecommerce.mapper.ProdutoMapper;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProdutoService {
@@ -14,28 +15,36 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    public List<Produto> listarTodos() {
-        return produtoRepository.findAll();
+    @Autowired
+    private ProdutoMapper produtoMapper;
+
+    public List<ProdutoDTO> listarTodos() {
+        return produtoMapper.toDTOList(produtoRepository.findAll());
     }
 
-    public Optional<Produto> buscarPorId(Long id) {
-        return produtoRepository.findById(id);
+    public ProdutoDTO buscarPorId(Long id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
+        return produtoMapper.toDTO(produto);
     }
 
-    public Produto criar(Produto produto) {
-        return produtoRepository.save(produto);
+    public ProdutoDTO criar(ProdutoDTO produtoDTO) {
+        Produto produto = produtoMapper.toEntity(produtoDTO);
+        Produto salvo = produtoRepository.save(produto);
+        return produtoMapper.toDTO(salvo);
     }
 
-    public Produto atualizar(Long id, Produto produtoDetalhes) {
+    public ProdutoDTO atualizar(Long id, ProdutoDTO produtoDTO) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
 
-        produto.setNome(produtoDetalhes.getNome());
-        produto.setDescricao(produtoDetalhes.getDescricao());
-        produto.setPreco(produtoDetalhes.getPreco());
-        produto.setEstoque(produtoDetalhes.getEstoque());
+        produto.setNome(produtoDTO.getNome());
+        produto.setDescricao(produtoDTO.getDescricao());
+        produto.setPreco(produtoDTO.getPreco());
+        produto.setEstoque(produtoDTO.getEstoque());
 
-        return produtoRepository.save(produto);
+        Produto atualizado = produtoRepository.save(produto);
+        return produtoMapper.toDTO(atualizado);
     }
 
     public void deletar(Long id) {
