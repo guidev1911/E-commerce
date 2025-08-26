@@ -3,7 +3,9 @@ package com.guidev1911.ecommerce.controller;
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.service.ProdutoService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -12,49 +14,45 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/produtos")
+@RequestMapping("/api/produtos")
+@Validated
 public class ProdutoController {
 
-    @Autowired
-    private ProdutoService produtoService;
+    private final ProdutoService produtoService;
 
-    @GetMapping
-    public ResponseEntity<List<ProdutoDTO>> listarTodos() {
-        return ResponseEntity.ok(produtoService.listarTodos());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(produtoService.buscarPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ProdutoController(ProdutoService produtoService) {
+        this.produtoService = produtoService;
     }
 
     @PostMapping
-    public ResponseEntity<ProdutoDTO> criar(@RequestBody ProdutoDTO produtoDTO) {
+    public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoDTO produtoDTO) {
         ProdutoDTO novo = produtoService.criar(produtoDTO);
         return new ResponseEntity<>(novo, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> atualizar(@PathVariable Long id, @RequestBody ProdutoDTO produtoDTO) {
-        try {
-            ProdutoDTO atualizado = produtoService.atualizar(id, produtoDTO);
-            return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ProdutoDTO> atualizar(
+            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id,
+            @Valid @RequestBody ProdutoDTO produtoDTO) {
+        ProdutoDTO atualizado = produtoService.atualizar(id, produtoDTO);
+        return ResponseEntity.ok(atualizado);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProdutoDTO> buscarPorId(
+            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id) {
+        return ResponseEntity.ok(produtoService.buscarPorId(id));
+    }
+    @GetMapping
+    public ResponseEntity<List<ProdutoDTO>> listarTodos() {
+        List<ProdutoDTO> produtos = produtoService.listarTodos();
+        return ResponseEntity.ok(produtos);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        try {
-            produtoService.deletar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deletar(
+            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id) {
+        produtoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
