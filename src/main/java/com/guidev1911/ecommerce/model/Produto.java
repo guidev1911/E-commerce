@@ -31,6 +31,10 @@ public class Produto {
     @Column(nullable = false)
     private Integer estoque;
 
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+
     public Produto() {}
 
     public Produto(String nome, String descricao, BigDecimal preco, Integer estoque) {
