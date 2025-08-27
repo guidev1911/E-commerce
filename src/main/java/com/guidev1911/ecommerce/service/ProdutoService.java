@@ -5,6 +5,8 @@ import com.guidev1911.ecommerce.mapper.ProdutoMapper;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +20,9 @@ public class ProdutoService {
     @Autowired
     private ProdutoMapper produtoMapper;
 
-    public List<ProdutoDTO> listarTodos() {
-        return produtoMapper.toDTOList(produtoRepository.findAll());
+    public Page<ProdutoDTO> listarTodos(Pageable pageable) {
+        Page<Produto> page = produtoRepository.findAll(pageable);
+        return page.map(produtoMapper::toDTO);
     }
 
     public ProdutoDTO buscarPorId(Long id) {

@@ -6,6 +6,8 @@ import com.guidev1911.ecommerce.service.ProdutoService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,12 @@ public class ProdutoController {
 
     public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProdutoDTO>> listarTodos(Pageable pageable) {
+        Page<ProdutoDTO> produtos = produtoService.listarTodos(pageable);
+        return ResponseEntity.ok(produtos);
     }
 
     @PostMapping
@@ -42,11 +50,6 @@ public class ProdutoController {
     public ResponseEntity<ProdutoDTO> buscarPorId(
             @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id) {
         return ResponseEntity.ok(produtoService.buscarPorId(id));
-    }
-    @GetMapping
-    public ResponseEntity<List<ProdutoDTO>> listarTodos() {
-        List<ProdutoDTO> produtos = produtoService.listarTodos();
-        return ResponseEntity.ok(produtos);
     }
 
     @DeleteMapping("/{id}")
