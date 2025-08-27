@@ -1,6 +1,7 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
+import com.guidev1911.ecommerce.exception.ProdutoNotFoundException;
 import com.guidev1911.ecommerce.mapper.ProdutoMapper;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
@@ -26,9 +27,7 @@ public class ProdutoService {
     }
 
     public ProdutoDTO buscarPorId(Long id) {
-        Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
-        return produtoMapper.toDTO(produto);
+        return produtoMapper.toDTO(VerificarExistencia(id));
     }
 
     public ProdutoDTO criar(ProdutoDTO produtoDTO) {
@@ -38,8 +37,7 @@ public class ProdutoService {
     }
 
     public ProdutoDTO atualizar(Long id, ProdutoDTO produtoDTO) {
-        Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
+        Produto produto = VerificarExistencia(id);
 
         produtoMapper.updateEntityFromDTO(produtoDTO, produto);
 
@@ -48,8 +46,12 @@ public class ProdutoService {
     }
 
     public void deletar(Long id) {
-        Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
+        Produto produto = VerificarExistencia(id);
         produtoRepository.delete(produto);
+    }
+
+    private Produto VerificarExistencia(Long id) {
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> new ProdutoNotFoundException(id));
     }
 }
