@@ -7,6 +7,9 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
+import org.mapstruct.MappingTarget;
+
+
 @Mapper(componentModel = "spring")
 public interface ProdutoMapper {
 
@@ -17,4 +20,6 @@ public interface ProdutoMapper {
     Produto toEntity(ProdutoDTO produtoDTO);
 
     List<ProdutoDTO> toDTOList(List<Produto> produtos);
+
+    void updateEntityFromDTO(ProdutoDTO produtoDTO, @MappingTarget Produto produto);
 }

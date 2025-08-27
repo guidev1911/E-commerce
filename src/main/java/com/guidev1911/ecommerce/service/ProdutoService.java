@@ -38,10 +38,7 @@ public class ProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado com id: " + id));
 
-        produto.setNome(produtoDTO.getNome());
-        produto.setDescricao(produtoDTO.getDescricao());
-        produto.setPreco(produtoDTO.getPreco());
-        produto.setEstoque(produtoDTO.getEstoque());
+        produtoMapper.updateEntityFromDTO(produtoDTO, produto);
 
         Produto atualizado = produtoRepository.save(produto);
         return produtoMapper.toDTO(atualizado);
