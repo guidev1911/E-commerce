@@ -1,6 +1,5 @@
 package com.guidev1911.ecommerce.exception.global;
 
-import com.guidev1911.ecommerce.exception.ProdutoNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +29,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(ProdutoNotFoundException.class)
-    public ResponseEntity<ApiError> handleProdutoNotFound(ProdutoNotFoundException ex,
-                                                          HttpServletRequest request) {
+    @ExceptionHandler(EntidadeNaoEncontradaException.class)
+    public ResponseEntity<ApiError> handleEntidadeNotFound(EntidadeNaoEncontradaException ex,
+                                                           HttpServletRequest request) {
         ApiError error = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
@@ -41,6 +40,7 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {

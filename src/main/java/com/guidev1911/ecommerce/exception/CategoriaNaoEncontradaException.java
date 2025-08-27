@@ -1,6 +1,8 @@
 package com.guidev1911.ecommerce.exception;
 
-public class CategoriaNaoEncontradaException extends RuntimeException {
+import com.guidev1911.ecommerce.exception.global.EntidadeNaoEncontradaException;
+
+public class CategoriaNaoEncontradaException extends EntidadeNaoEncontradaException {
     public CategoriaNaoEncontradaException(Long id) {
         super("Categoria com ID " + id + " não encontrada.");
     }
