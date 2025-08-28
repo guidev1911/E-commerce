@@ -5,6 +5,8 @@ import com.guidev1911.ecommerce.exception.CategoriaNaoEncontradaException;
 import com.guidev1911.ecommerce.mapper.CategoriaMapper;
 import com.guidev1911.ecommerce.model.Categoria;
 import com.guidev1911.ecommerce.repository.CategoriaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,11 +29,9 @@ public class CategoriaService {
         return categoriaMapper.toDTO(salvo);
     }
 
-    public List<CategoriaDTO> listar() {
-        return categoriaRepository.findAll()
-                .stream()
-                .map(categoriaMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<CategoriaDTO> listarTodos(Pageable pageable) {
+        return categoriaRepository.findAll(pageable)
+                .map(categoriaMapper::toDTO);
     }
 
     public CategoriaDTO buscarPorId(Long id) {

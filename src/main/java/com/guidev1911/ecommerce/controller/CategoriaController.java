@@ -3,11 +3,11 @@ package com.guidev1911.ecommerce.controller;
 import com.guidev1911.ecommerce.dto.CategoriaDTO;
 import com.guidev1911.ecommerce.service.CategoriaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categorias")
@@ -25,8 +25,8 @@ public class CategoriaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoriaDTO>> listar() {
-        return ResponseEntity.ok(categoriaService.listar());
+    public ResponseEntity<Page<CategoriaDTO>> listar(Pageable pageable) {
+        return ResponseEntity.ok(categoriaService.listarTodos(pageable));
     }
 
     @GetMapping("/{id}")
