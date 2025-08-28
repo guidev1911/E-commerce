@@ -31,8 +31,8 @@ public class Produto {
     @Column(nullable = false)
     private Integer estoque;
 
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
     public Produto() {}
@@ -43,7 +43,6 @@ public class Produto {
         this.preco = preco;
         this.estoque = estoque;
     }
-
 
     public Long getId() {
         return id;
@@ -83,5 +82,13 @@ public class Produto {
 
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 }

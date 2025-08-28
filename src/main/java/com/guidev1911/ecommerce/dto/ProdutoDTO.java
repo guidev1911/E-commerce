@@ -22,9 +22,13 @@ public class ProdutoDTO {
     @Positive(message = "O estoque deve ser maior que zero")
     private Integer estoque;
 
+    @NotNull
+    private Long categoriaId;
+
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -32,6 +36,7 @@ public class ProdutoDTO {
     public String getNome() {
         return nome;
     }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
@@ -39,6 +44,7 @@ public class ProdutoDTO {
     public String getDescricao() {
         return descricao;
     }
+
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
@@ -46,6 +52,7 @@ public class ProdutoDTO {
     public BigDecimal getPreco() {
         return preco;
     }
+
     public void setPreco(BigDecimal preco) {
         this.preco = preco;
     }
@@ -53,7 +60,16 @@ public class ProdutoDTO {
     public Integer getEstoque() {
         return estoque;
     }
+
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public Long getCategoriaId() {
+        return categoriaId;
+    }
+
+    public void setCategoriaId(Long categoriaId) {
+        this.categoriaId = categoriaId;
     }
 }
