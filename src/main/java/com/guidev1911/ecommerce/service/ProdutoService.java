@@ -11,7 +11,10 @@ import com.guidev1911.ecommerce.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 public class ProdutoService {
@@ -25,8 +28,20 @@ public class ProdutoService {
     @Autowired
     private ProdutoMapper produtoMapper;
 
-    public Page<ProdutoDTO> listarTodos(Pageable pageable) {
-        Page<Produto> page = produtoRepository.findAll(pageable);
+    public Page<ProdutoDTO> listarFiltrado(
+            Long categoriaId,
+            BigDecimal precoMin,
+            BigDecimal precoMax,
+            String nome,
+            Pageable pageable) {
+
+        Specification<Produto> spec = Specification.allOf(
+                ProdutoSpecification.comCategoria(categoriaId),
+                ProdutoSpecification.comPrecoEntre(precoMin, precoMax),
+                ProdutoSpecification.comNome(nome)
+        );
+
+        Page<Produto> page = produtoRepository.findAll(spec, pageable);
         return page.map(produtoMapper::toDTO);
     }
 

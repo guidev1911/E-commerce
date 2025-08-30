@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -27,8 +28,14 @@ public class ProdutoController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProdutoDTO>> listarTodos(Pageable pageable) {
-        Page<ProdutoDTO> produtos = produtoService.listarTodos(pageable);
+    public ResponseEntity<Page<ProdutoDTO>> listarTodos(
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) BigDecimal precoMin,
+            @RequestParam(required = false) BigDecimal precoMax,
+            @RequestParam(required = false) String nome,
+            Pageable pageable) {
+
+        Page<ProdutoDTO> produtos = produtoService.listarFiltrado(categoriaId, precoMin, precoMax, nome, pageable);
         return ResponseEntity.ok(produtos);
     }
 
