@@ -1,6 +1,7 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
+import com.guidev1911.ecommerce.exception.CarrinhoNotFoundException;
 import com.guidev1911.ecommerce.exception.ProdutoNotFoundException;
 import com.guidev1911.ecommerce.mapper.CarrinhoMapper;
 import com.guidev1911.ecommerce.model.Carrinho;
@@ -68,6 +69,6 @@ public class CarrinhoService {
 
     private Carrinho buscarCarrinho(Long id) {
         return carrinhoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CarrinhoNotFoundException("Carrinho não encontrado"));
     }
 }
