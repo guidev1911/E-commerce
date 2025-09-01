@@ -18,3 +18,8 @@ springdoc:
     enabled: true
   swagger-ui:
     path: /swagger-ui.html
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXP}
+  refresh-expiration-ms: ${JWT_RT}
