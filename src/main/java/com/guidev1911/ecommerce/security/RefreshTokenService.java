@@ -1,10 +1,13 @@
 package com.guidev1911.ecommerce.security;
 
+import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import com.guidev1911.ecommerce.model.RefreshToken;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +18,10 @@ public class RefreshTokenService {
     private final RefreshTokenRepository repo;
     private final long refreshExpirationMs;
 
-    public RefreshTokenService(RefreshTokenRepository repo, @Value("${jwt.refresh-expiration-ms}") long refreshExpirationMs) {
+    public RefreshTokenService(
+            RefreshTokenRepository repo,
+            @Value("${jwt.refresh-expiration-ms}") long refreshExpirationMs
+    ) {
         this.repo = repo;
         this.refreshExpirationMs = refreshExpirationMs;
     }
@@ -31,16 +37,30 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(Instant.now())) {
             repo.delete(token);
-            throw new RuntimeException("Refresh token expirado. Faça login novamente.");
+            throw new RefreshTokenException("Refresh token expirado. Faça login novamente.");
         }
         return token;
+    }
+    public RefreshToken rotateToken(RefreshToken oldToken) {
+        verifyExpiration(oldToken);
+        repo.delete(oldToken);
+        return createRefreshToken(oldToken.getUsuario());
     }
 
     public void deleteByUsuario(Usuario usuario) {
         repo.deleteByUsuario(usuario);
     }
 
+    public void deleteByToken(String token) {
+        repo.findByToken(token).ifPresent(repo::delete);
+    }
+
     public Optional<RefreshToken> findByToken(String token) {
         return repo.findByToken(token);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void cleanExpiredTokens() {
+        repo.deleteAllByExpiryDateBefore(Instant.now());
     }
 }

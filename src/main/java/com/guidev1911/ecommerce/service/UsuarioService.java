@@ -2,6 +2,7 @@ package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.AuthResponse;
 import com.guidev1911.ecommerce.dto.UserRegisterDTO;
+import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import com.guidev1911.ecommerce.model.RefreshToken;
 import com.guidev1911.ecommerce.model.Role;
 import com.guidev1911.ecommerce.model.Usuario;
@@ -62,13 +63,16 @@ public class UsuarioService {
 
     public AuthResponse refreshToken(String requestRefreshToken) {
         RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken)
-                .orElseThrow(() -> new RuntimeException("Refresh token inválido"));
+                .orElseThrow(() -> new RefreshTokenException("Refresh token inválido. Faça login novamente."));
 
-        refreshTokenService.verifyExpiration(refreshToken);
-        Usuario usuario = refreshToken.getUsuario();
+        RefreshToken newRefreshToken = refreshTokenService.rotateToken(refreshToken);
+
+        Usuario usuario = newRefreshToken.getUsuario();
 
         String accessToken = jwtProvider.generateAccessToken(usuario.getEmail());
-        return new AuthResponse(accessToken, requestRefreshToken, jwtProvider.getAccessTokenExpiryMs());
+
+        return new AuthResponse(accessToken, newRefreshToken.getToken(), jwtProvider.getAccessTokenExpiryMs());
     }
+
 }
 
