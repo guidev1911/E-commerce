@@ -2,7 +2,7 @@ package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.exception.CategoriaNaoEncontradaException;
-import com.guidev1911.ecommerce.exception.ProdutoNotFoundException;
+import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.ProdutoMapper;
 import com.guidev1911.ecommerce.model.Categoria;
 import com.guidev1911.ecommerce.model.Produto;
@@ -75,7 +75,7 @@ public class ProdutoService {
 
     private Produto verificarExistencia(Long id) {
         return produtoRepository.findById(id)
-                .orElseThrow(() -> new ProdutoNotFoundException(id));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
     }
 
     private Categoria verificarCategoria(Long id) {

@@ -2,7 +2,7 @@ package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
 import com.guidev1911.ecommerce.exception.CarrinhoNotFoundException;
-import com.guidev1911.ecommerce.exception.ProdutoNotFoundException;
+import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.CarrinhoMapper;
 import com.guidev1911.ecommerce.model.Carrinho;
 import com.guidev1911.ecommerce.model.ItemCarrinho;
@@ -35,7 +35,7 @@ public class CarrinhoService {
     public CarrinhoDTO adicionarItem(Long carrinhoId, Long produtoId, Integer quantidade) {
         Carrinho carrinho = buscarCarrinho(carrinhoId);
         Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new ProdutoNotFoundException(produtoId));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException(produtoId));
 
         Optional<ItemCarrinho> existente = carrinho.getItens().stream()
                 .filter(i -> i.getProduto().getId().equals(produtoId))
