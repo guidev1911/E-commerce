@@ -22,8 +22,17 @@ public interface ProdutoMapper {
 
     List<ProdutoDTO> toDTOList(List<Produto> produtos);
 
-    @Mapping(source = "categoriaId", target = "categoria")
-    void updateEntityFromDTO(ProdutoDTO produtoDTO, @MappingTarget Produto produto);
+    default void updateEntityFromDTO(ProdutoDTO dto, @MappingTarget Produto produto) {
+        if (dto.getNome() != null) produto.setNome(dto.getNome());
+        if (dto.getDescricao() != null) produto.setDescricao(dto.getDescricao());
+        if (dto.getPreco() != null) produto.setPreco(dto.getPreco());
+        if (dto.getEstoque() != null) produto.setEstoque(dto.getEstoque());
+        if (dto.getCategoriaId() != null) {
+            Categoria categoria = new Categoria();
+            categoria.setId(dto.getCategoriaId());
+            produto.setCategoria(categoria);
+        }
+    }
 
     default Categoria map(Long categoriaId) {
         if (categoriaId == null) return null;
