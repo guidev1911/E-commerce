@@ -10,6 +10,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CarrinhoMapper {
 
+    @Mapping(target = "usuarioId", source = "usuario.id")
+    @Mapping(target = "itens", source = "itens")
+    @Mapping(target = "total", expression = "java(carrinho.getTotal())")
     CarrinhoDTO toDTO(Carrinho carrinho);
 
     @Mapping(target = "produtoId", source = "produto.id")

@@ -1,7 +1,6 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
-import com.guidev1911.ecommerce.exception.CarrinhoNotFoundException;
 import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.CarrinhoMapper;
 import com.guidev1911.ecommerce.model.Carrinho;
@@ -10,7 +9,6 @@ import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.repository.CarrinhoRepository;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,34 +28,37 @@ public class CarrinhoService {
         this.carrinhoMapper = carrinhoMapper;
     }
 
-    public CarrinhoDTO adicionarItem(Usuario usuario, Long produtoId, Integer quantidade) {
+    public CarrinhoDTO alterarItem(Usuario usuario, Long produtoId, Integer quantidade, boolean incrementar) {
         Carrinho carrinho = buscarOuCriarCarrinho(usuario);
         Produto produto = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(produtoId));
 
-        Optional<ItemCarrinho> existente = carrinho.getItens().stream()
+        Optional<ItemCarrinho> itemOpt = carrinho.getItens().stream()
                 .filter(i -> i.getProduto().getId().equals(produtoId))
                 .findFirst();
 
-        if (existente.isPresent()) {
-            ItemCarrinho item = existente.get();
-            int novaQuantidade = item.getQuantidade() + quantidade;
+        if (itemOpt.isPresent()) {
+            ItemCarrinho item = itemOpt.get();
+            int novaQuantidade = incrementar
+                    ? item.getQuantidade() + quantidade
+                    : quantidade;
 
-            if (novaQuantidade > produto.getEstoque()) {
+            if (novaQuantidade <= 0) {
+                carrinho.getItens().remove(item);
+            } else if (novaQuantidade > produto.getEstoque()) {
                 throw new RuntimeException("Quantidade solicitada excede o estoque disponível.");
+            } else {
+                item.setQuantidade(novaQuantidade);
             }
-
-            item.setQuantidade(novaQuantidade);
-        } else {
+        } else if (quantidade > 0) {
             if (quantidade > produto.getEstoque()) {
                 throw new RuntimeException("Quantidade solicitada excede o estoque disponível.");
             }
-
-            ItemCarrinho item = new ItemCarrinho();
-            item.setCarrinho(carrinho);
-            item.setProduto(produto);
-            item.setQuantidade(quantidade);
-            carrinho.getItens().add(item);
+            ItemCarrinho novoItem = new ItemCarrinho();
+            novoItem.setCarrinho(carrinho);
+            novoItem.setProduto(produto);
+            novoItem.setQuantidade(quantidade);
+            carrinho.getItens().add(novoItem);
         }
 
         carrinho = carrinhoRepository.save(carrinho);

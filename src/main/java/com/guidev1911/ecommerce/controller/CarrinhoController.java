@@ -4,7 +4,6 @@ import com.guidev1911.ecommerce.dto.CarrinhoDTO;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.CarrinhoService;
 import com.guidev1911.ecommerce.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +26,16 @@ public class CarrinhoController {
             @RequestParam Integer quantidade,
             Authentication authentication) {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
-        return ResponseEntity.ok(carrinhoService.adicionarItem(usuario, produtoId, quantidade));
+        return ResponseEntity.ok(carrinhoService.alterarItem(usuario, produtoId, quantidade, true));
+    }
+
+    @PutMapping("/itens/{produtoId}")
+    public ResponseEntity<CarrinhoDTO> atualizarQuantidade(
+            @PathVariable Long produtoId,
+            @RequestParam Integer quantidade,
+            Authentication authentication) {
+        Usuario usuario = usuarioService.findByEmail(authentication.getName());
+        return ResponseEntity.ok(carrinhoService.alterarItem(usuario, produtoId, quantidade, false));
     }
 
     @DeleteMapping("/itens/{produtoId}")

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class CarrinhoDTO {
     private Long id;
+    private Long usuarioId;
     private List<ItemCarrinhoDTO> itens;
     private BigDecimal total;
 
@@ -14,6 +15,14 @@ public class CarrinhoDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public List<ItemCarrinhoDTO> getItens() {
@@ -32,3 +41,4 @@ public class CarrinhoDTO {
         this.total = total;
     }
 }
+
