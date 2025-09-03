@@ -17,6 +17,10 @@ public class Carrinho {
     @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemCarrinho> itens = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "usuario_id", nullable = false, unique = true)
+    private Usuario usuario;
+
     public BigDecimal getTotal() {
         return itens.stream()
                 .map(ItemCarrinho::getSubtotal)
@@ -37,5 +41,13 @@ public class Carrinho {
 
     public void setItens(List<ItemCarrinho> itens) {
         this.itens = itens;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }
