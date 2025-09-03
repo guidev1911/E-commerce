@@ -2,6 +2,7 @@ package com.guidev1911.ecommerce.exception.global;
 
 import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
+import com.guidev1911.ecommerce.exception.EstoqueInsuficienteException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailJaRegistradoException.class)
     public ResponseEntity<ApiError> handleEmailJaRegistrado(EmailJaRegistradoException ex,
                                                             HttpServletRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    @ExceptionHandler(EstoqueInsuficienteException.class)
+    public ResponseEntity<ApiError> handleEstoqueInsuficiente(EstoqueInsuficienteException ex,
+                                                              HttpServletRequest request) {
         ApiError error = new ApiError(
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",

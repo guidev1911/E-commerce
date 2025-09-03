@@ -1,6 +1,7 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
+import com.guidev1911.ecommerce.exception.EstoqueInsuficienteException;
 import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.CarrinhoMapper;
 import com.guidev1911.ecommerce.model.Carrinho;
@@ -46,13 +47,13 @@ public class CarrinhoService {
             if (novaQuantidade <= 0) {
                 carrinho.getItens().remove(item);
             } else if (novaQuantidade > produto.getEstoque()) {
-                throw new RuntimeException("Quantidade solicitada excede o estoque disponível.");
+                throw new EstoqueInsuficienteException(produtoId, novaQuantidade, produto.getEstoque());
             } else {
                 item.setQuantidade(novaQuantidade);
             }
         } else if (quantidade > 0) {
             if (quantidade > produto.getEstoque()) {
-                throw new RuntimeException("Quantidade solicitada excede o estoque disponível.");
+                throw new EstoqueInsuficienteException(produtoId, quantidade, produto.getEstoque());
             }
             ItemCarrinho novoItem = new ItemCarrinho();
             novoItem.setCarrinho(carrinho);
