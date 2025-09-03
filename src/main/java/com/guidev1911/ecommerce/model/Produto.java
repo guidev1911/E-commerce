@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
 @Table(name = "produtos")
@@ -37,11 +38,13 @@ public class Produto {
 
     public Produto() {}
 
-    public Produto(String nome, String descricao, BigDecimal preco, Integer estoque) {
+    public Produto(Long id, String nome, String descricao, BigDecimal preco, Integer estoque, Categoria categoria) {
+        this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
         this.estoque = estoque;
+        this.categoria = categoria;
     }
 
     public Long getId() {
@@ -90,5 +93,18 @@ public class Produto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Produto produto = (Produto) o;
+        return Objects.equals(getId(), produto.getId()) && Objects.equals(getNome(), produto.getNome()) && Objects.equals(getDescricao(), produto.getDescricao()) && Objects.equals(getPreco(), produto.getPreco()) && Objects.equals(getEstoque(), produto.getEstoque()) && Objects.equals(getCategoria(), produto.getCategoria());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getNome(), getDescricao(), getPreco(), getEstoque(), getCategoria());
     }
 }

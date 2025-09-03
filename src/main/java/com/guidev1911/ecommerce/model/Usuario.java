@@ -30,6 +30,18 @@ public class Usuario {
     @Column(nullable = false)
     private Instant criadoEm = Instant.now();
 
+    public Usuario() {
+    }
+
+    public Usuario(Long id, String email, String senha, String nome, Set<Role> roles, Instant criadoEm) {
+        this.id = id;
+        this.email = email;
+        this.senha = senha;
+        this.nome = nome;
+        this.roles = roles;
+        this.criadoEm = criadoEm;
+    }
+
     public Long getId() {
         return id;
     }

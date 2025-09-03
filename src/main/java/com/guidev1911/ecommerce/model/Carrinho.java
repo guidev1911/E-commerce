@@ -27,6 +27,15 @@ public class Carrinho {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public Carrinho() {
+    }
+
+    public Carrinho(Long id, List<ItemCarrinho> itens, Usuario usuario) {
+        this.id = id;
+        this.itens = itens;
+        this.usuario = usuario;
+    }
+
     public Long getId() {
         return id;
     }
