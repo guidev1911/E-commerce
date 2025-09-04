@@ -1,6 +1,7 @@
 package com.guidev1911.ecommerce.controller;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
+import com.guidev1911.ecommerce.dto.ItemCarrinhoRequest;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.CarrinhoService;
 import com.guidev1911.ecommerce.service.UsuarioService;
@@ -22,20 +23,23 @@ public class CarrinhoController {
 
     @PostMapping("/itens")
     public ResponseEntity<CarrinhoDTO> adicionarItem(
-            @RequestParam Long produtoId,
-            @RequestParam Integer quantidade,
+            @RequestBody ItemCarrinhoRequest request,
             Authentication authentication) {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
-        return ResponseEntity.ok(carrinhoService.alterarItem(usuario, produtoId, quantidade, true));
+        return ResponseEntity.ok(
+                carrinhoService.alterarItem(usuario, request.getProdutoId(), request.getQuantidade(), true)
+        );
     }
 
     @PutMapping("/itens/{produtoId}")
     public ResponseEntity<CarrinhoDTO> atualizarQuantidade(
             @PathVariable Long produtoId,
-            @RequestParam Integer quantidade,
+            @RequestBody ItemCarrinhoRequest request,
             Authentication authentication) {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
-        return ResponseEntity.ok(carrinhoService.alterarItem(usuario, produtoId, quantidade, false));
+        return ResponseEntity.ok(
+                carrinhoService.alterarItem(usuario, produtoId, request.getQuantidade(), false)
+        );
     }
 
     @DeleteMapping("/itens/{produtoId}")
