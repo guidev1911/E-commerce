@@ -47,6 +47,9 @@ public class Produto {
         this.categoria = categoria;
     }
 
+    public Produto(Long produtoId) {
+    }
+
     public Long getId() {
         return id;
     }
