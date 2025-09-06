@@ -12,6 +12,8 @@ public class PedidoDTO {
     private String status;
     private LocalDateTime criadoEm;
 
+    private LocalDateTime expiraEm;
+
     public Long getId() {
         return id;
     }
@@ -58,5 +60,13 @@ public class PedidoDTO {
 
     public void setCriadoEm(LocalDateTime criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public LocalDateTime getExpiraEm() {
+        return expiraEm;
+    }
+
+    public void setExpiraEm(LocalDateTime expiraEm) {
+        this.expiraEm = expiraEm;
     }
 }

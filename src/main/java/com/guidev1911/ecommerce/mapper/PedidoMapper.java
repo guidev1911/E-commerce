@@ -17,6 +17,7 @@ public interface PedidoMapper {
     @Mapping(source = "total", target = "total")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "criadoEm", target = "criadoEm")
+    @Mapping(source = "expiraEm", target = "expiraEm")
     PedidoDTO toDTO(Pedido pedido);
 
     @Mapping(source = "produto.id", target = "produtoId")

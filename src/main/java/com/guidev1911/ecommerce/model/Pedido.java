@@ -29,16 +29,19 @@ public class Pedido {
 
     private LocalDateTime criadoEm = LocalDateTime.now();
 
+    private LocalDateTime expiraEm;
+
     public Pedido() {
     }
 
-    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm) {
+    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm, LocalDateTime expiraEm) {
         this.id = id;
         this.usuario = usuario;
         this.itens = itens;
         this.total = total;
         this.status = status;
         this.criadoEm = criadoEm;
+        this.expiraEm = expiraEm;
     }
 
     public Long getId() {
@@ -87,5 +90,13 @@ public class Pedido {
 
     public void setCriadoEm(LocalDateTime criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public LocalDateTime getExpiraEm() {
+        return expiraEm;
+    }
+
+    public void setExpiraEm(LocalDateTime expiraEm) {
+        this.expiraEm = expiraEm;
     }
 }

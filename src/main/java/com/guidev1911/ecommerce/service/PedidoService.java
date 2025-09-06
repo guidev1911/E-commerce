@@ -7,8 +7,10 @@ import com.guidev1911.ecommerce.mapper.PedidoMapper;
 import com.guidev1911.ecommerce.model.*;
 import com.guidev1911.ecommerce.repository.PedidoRepository;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +21,6 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final CarrinhoService carrinhoService;
     private final PedidoMapper pedidoMapper;
-
     private final ProdutoRepository produtoRepository;
 
     public PedidoService(PedidoRepository pedidoRepository,
@@ -43,6 +44,8 @@ public class PedidoService {
         pedido.setUsuario(usuario);
         pedido.setStatus(StatusPedido.PENDENTE);
         pedido.setTotal(carrinho.getTotal());
+        pedido.setCriadoEm(LocalDateTime.now());
+        pedido.setExpiraEm(LocalDateTime.now().plusHours(24));
 
         List<Long> produtoIds = carrinho.getItens().stream()
                 .map(ItemCarrinhoDTO::getProdutoId)
@@ -81,6 +84,26 @@ public class PedidoService {
     public PedidoDTO buscarPorId(Usuario usuario, Long id) {
         Pedido pedido = pedidoRepository.findByIdAndUsuario(id, usuario)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+
+        if (pedido.getStatus() == StatusPedido.PENDENTE &&
+                pedido.getExpiraEm() != null &&
+                pedido.getExpiraEm().isBefore(LocalDateTime.now())) {
+            pedido.setStatus(StatusPedido.CANCELADO);
+            pedidoRepository.save(pedido);
+        }
+
         return pedidoMapper.toDTO(pedido);
+    }
+
+    @Scheduled(fixedRate = 60_000)
+    public void cancelarPedidosExpirados() {
+        List<Pedido> pedidosPendentes = pedidoRepository.findByStatus(StatusPedido.PENDENTE);
+        for (Pedido pedido : pedidosPendentes) {
+            if (pedido.getExpiraEm() != null &&
+                    pedido.getExpiraEm().isBefore(LocalDateTime.now())) {
+                pedido.setStatus(StatusPedido.CANCELADO);
+                pedidoRepository.save(pedido);
+            }
+        }
     }
 }
