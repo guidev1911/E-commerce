@@ -11,6 +11,7 @@ import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.repository.CarrinhoRepository;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -85,5 +86,11 @@ public class CarrinhoService {
                     novo.setUsuario(usuario);
                     return carrinhoRepository.save(novo);
                 });
+    }
+    @Transactional
+    public void limparCarrinho(Usuario usuario) {
+        Carrinho carrinho = buscarOuCriarCarrinho(usuario);
+        carrinho.getItens().clear();
+        carrinhoRepository.save(carrinho);
     }
 }

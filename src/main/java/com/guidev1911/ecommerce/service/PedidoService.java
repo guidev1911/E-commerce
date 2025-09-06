@@ -72,6 +72,9 @@ public class PedidoService {
         }
 
         Pedido salvo = pedidoRepository.save(pedido);
+
+        carrinhoService.limparCarrinho(usuario);
+
         return pedidoMapper.toDTO(salvo);
     }
 
