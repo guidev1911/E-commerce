@@ -3,6 +3,9 @@ package com.guidev1911.ecommerce.service;
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
 import com.guidev1911.ecommerce.dto.ItemCarrinhoDTO;
 import com.guidev1911.ecommerce.dto.PedidoDTO;
+import com.guidev1911.ecommerce.exception.CarrinhoVazioException;
+import com.guidev1911.ecommerce.exception.PedidoNaoEncontradoException;
+import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.PedidoMapper;
 import com.guidev1911.ecommerce.model.*;
 import com.guidev1911.ecommerce.repository.PedidoRepository;
@@ -37,7 +40,7 @@ public class PedidoService {
         CarrinhoDTO carrinho = carrinhoService.listarCarrinho(usuario);
 
         if (carrinho.getItens().isEmpty()) {
-            throw new RuntimeException("Carrinho vazio, não é possível criar pedido.");
+            throw new CarrinhoVazioException("Carrinho vazio, não é possível criar pedido.");
         }
 
         Pedido pedido = new Pedido();
@@ -58,7 +61,7 @@ public class PedidoService {
         for (ItemCarrinhoDTO item : carrinho.getItens()) {
             Produto produto = produtos.get(item.getProdutoId());
             if (produto == null) {
-                throw new RuntimeException("Produto não encontrado: " + item.getProdutoId());
+                throw new ProdutoNaoEncontradoException(item.getProdutoId());
             }
 
             ItemPedido ip = new ItemPedido();
@@ -86,7 +89,7 @@ public class PedidoService {
 
     public PedidoDTO buscarPorId(Usuario usuario, Long id) {
         Pedido pedido = pedidoRepository.findByIdAndUsuario(id, usuario)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado"));
 
         if (pedido.getStatus() == StatusPedido.PENDENTE &&
                 pedido.getExpiraEm() != null &&

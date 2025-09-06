@@ -1,9 +1,6 @@
 package com.guidev1911.ecommerce.exception.global;
 
-import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
-import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
-import com.guidev1911.ecommerce.exception.EstoqueInsuficienteException;
-import com.guidev1911.ecommerce.exception.RefreshTokenException;
+import com.guidev1911.ecommerce.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +75,18 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(CarrinhoVazioException.class)
+    public ResponseEntity<ApiError> handleCarrinhoVazio(CarrinhoVazioException ex,
+                                                        HttpServletRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(RefreshTokenException.class)
