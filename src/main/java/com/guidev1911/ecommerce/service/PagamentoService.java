@@ -15,6 +15,8 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+import static com.guidev1911.ecommerce.service.PedidoUtils.recalcularTotal;
+
 @Service
 public class PagamentoService {
 
@@ -112,11 +114,5 @@ public class PagamentoService {
 
         pedidoRepository.save(pedido);
         pagamentoRepository.save(pagamento);
-    }
-
-    private BigDecimal recalcularTotal(Pedido pedido) {
-        return pedido.getItens().stream()
-                .map(ItemPedido::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

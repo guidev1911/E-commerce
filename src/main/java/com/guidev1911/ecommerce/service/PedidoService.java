@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.guidev1911.ecommerce.service.PedidoUtils.recalcularTotal;
+
 @Service
 public class PedidoService {
 
@@ -46,7 +48,7 @@ public class PedidoService {
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setStatus(StatusPedido.PENDENTE);
-        pedido.setTotal(carrinho.getTotal());
+        pedido.setTotal(recalcularTotal(pedido));
         pedido.setCriadoEm(LocalDateTime.now());
         pedido.setExpiraEm(LocalDateTime.now().plusHours(24));
 
