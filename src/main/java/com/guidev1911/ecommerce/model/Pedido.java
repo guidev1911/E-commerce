@@ -22,6 +22,7 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itens = new ArrayList<>();
 
+    @Column(precision = 15, scale = 2, nullable = false)
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
@@ -31,10 +32,15 @@ public class Pedido {
 
     private LocalDateTime expiraEm;
 
+    private LocalDateTime pagoEm;
+
+    @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL)
+    private Pagamento pagamento;
+
     public Pedido() {
     }
 
-    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm, LocalDateTime expiraEm) {
+    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm, LocalDateTime expiraEm, LocalDateTime pagoEm, Pagamento pagamento) {
         this.id = id;
         this.usuario = usuario;
         this.itens = itens;
@@ -42,6 +48,8 @@ public class Pedido {
         this.status = status;
         this.criadoEm = criadoEm;
         this.expiraEm = expiraEm;
+        this.pagoEm = pagoEm;
+        this.pagamento = pagamento;
     }
 
     public Long getId() {
@@ -98,5 +106,21 @@ public class Pedido {
 
     public void setExpiraEm(LocalDateTime expiraEm) {
         this.expiraEm = expiraEm;
+    }
+
+    public LocalDateTime getPagoEm() {
+        return pagoEm;
+    }
+
+    public void setPagoEm(LocalDateTime pagoEm) {
+        this.pagoEm = pagoEm;
+    }
+
+    public Pagamento getPagamento() {
+        return pagamento;
+    }
+
+    public void setPagamento(Pagamento pagamento) {
+        this.pagamento = pagamento;
     }
 }
