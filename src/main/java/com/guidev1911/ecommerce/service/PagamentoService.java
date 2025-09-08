@@ -15,8 +15,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-import static com.guidev1911.ecommerce.service.PedidoUtils.recalcularTotal;
-
 @Service
 public class PagamentoService {
 
@@ -34,7 +32,7 @@ public class PagamentoService {
     }
 
     @Transactional
-    public PagamentoDTO iniciarPagamento(Long pedidoId, MetodoPagamento metodo) throws InterruptedException {
+    public PagamentoDTO iniciarPagamento(Long pedidoId, MetodoPagamento metodo) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado"));
 
@@ -64,17 +62,16 @@ public class PagamentoService {
                 salvo.getConfirmadoEm()
         );
     }
+
     @Async
-    public void simularCallbackAsync(Long pagamentoId) throws InterruptedException {
+    public void simularCallbackAsync(Long pagamentoId) {
         try {
             Thread.sleep(3000 + random.nextInt(4000));
-            Thread.currentThread().interrupt();
+            boolean aprovado = random.nextInt(100) < 80;
+            processarCallback(pagamentoId, aprovado);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
-
-        boolean aprovado = random.nextInt(100) < 80;
-        processarCallback(pagamentoId, aprovado);
     }
 
     @Transactional
@@ -114,5 +111,11 @@ public class PagamentoService {
 
         pedidoRepository.save(pedido);
         pagamentoRepository.save(pagamento);
+    }
+
+    private BigDecimal recalcularTotal(Pedido pedido) {
+        return pedido.getItens().stream()
+                .map(ItemPedido::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
