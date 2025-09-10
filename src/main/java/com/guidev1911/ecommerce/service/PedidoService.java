@@ -97,7 +97,7 @@ public class PedidoService {
         if (pedido.getStatus() == StatusPedido.PENDENTE &&
                 pedido.getExpiraEm() != null &&
                 pedido.getExpiraEm().isBefore(LocalDateTime.now())) {
-            pedido.setStatus(StatusPedido.CANCELADO);
+            pedido.setStatus(StatusPedido.EXPIRADO);
             pedidoRepository.save(pedido);
         }
 
@@ -110,6 +110,7 @@ public class PedidoService {
 
         if (pedido.getStatus() == StatusPedido.ENVIADO ||
                 pedido.getStatus() == StatusPedido.CANCELADO ||
+                pedido.getStatus() == StatusPedido.EXPIRADO ||
                 pedido.getStatus() == StatusPedido.CONCLUIDO) {
             throw new CancelamentoNaoPermitidoException("Não é possível cancelar este pedido no status atual: " + pedido.getStatus());
         }
@@ -126,7 +127,7 @@ public class PedidoService {
         for (Pedido pedido : pedidosPendentes) {
             if (pedido.getExpiraEm() != null &&
                     pedido.getExpiraEm().isBefore(LocalDateTime.now())) {
-                pedido.setStatus(StatusPedido.CANCELADO);
+                pedido.setStatus(StatusPedido.EXPIRADO);
                 pedidoRepository.save(pedido);
             }
         }
