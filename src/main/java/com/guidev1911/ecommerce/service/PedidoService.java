@@ -3,6 +3,7 @@ package com.guidev1911.ecommerce.service;
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
 import com.guidev1911.ecommerce.dto.ItemCarrinhoDTO;
 import com.guidev1911.ecommerce.dto.PedidoDTO;
+import com.guidev1911.ecommerce.exception.CancelamentoNaoPermitidoException;
 import com.guidev1911.ecommerce.exception.CarrinhoVazioException;
 import com.guidev1911.ecommerce.exception.PedidoNaoEncontradoException;
 import com.guidev1911.ecommerce.exception.ProdutoNaoEncontradoException;
@@ -99,6 +100,22 @@ public class PedidoService {
             pedido.setStatus(StatusPedido.CANCELADO);
             pedidoRepository.save(pedido);
         }
+
+        return pedidoMapper.toDTO(pedido);
+    }
+
+    public PedidoDTO cancelarPedido(Usuario usuario, Long id) {
+        Pedido pedido = pedidoRepository.findByIdAndUsuario(id, usuario)
+                .orElseThrow(() -> new PedidoNaoEncontradoException("Pedido não encontrado"));
+
+        if (pedido.getStatus() == StatusPedido.ENVIADO ||
+                pedido.getStatus() == StatusPedido.CANCELADO ||
+                pedido.getStatus() == StatusPedido.CONCLUIDO) {
+            throw new CancelamentoNaoPermitidoException("Não é possível cancelar este pedido no status atual: " + pedido.getStatus());
+        }
+
+        pedido.setStatus(StatusPedido.CANCELADO);
+        pedidoRepository.save(pedido);
 
         return pedidoMapper.toDTO(pedido);
     }

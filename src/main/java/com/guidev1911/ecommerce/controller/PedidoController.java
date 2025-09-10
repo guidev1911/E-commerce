@@ -41,4 +41,11 @@ public class PedidoController {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
         return ResponseEntity.ok(pedidoService.buscarPorId(usuario, id));
     }
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<PedidoDTO> cancelarPedido(@PathVariable Long id, Authentication authentication) {
+        Usuario usuario = usuarioService.findByEmail(authentication.getName());
+        PedidoDTO pedidoCancelado = pedidoService.cancelarPedido(usuario, id);
+        return ResponseEntity.ok(pedidoCancelado);
+    }
 }
