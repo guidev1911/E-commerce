@@ -8,6 +8,7 @@ import com.guidev1911.ecommerce.model.Categoria;
 import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.repository.CategoriaRepository;
 import com.guidev1911.ecommerce.repository.ProdutoRepository;
+import com.guidev1911.ecommerce.specification.ProdutoSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

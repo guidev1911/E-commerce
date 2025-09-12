@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.guidev1911.ecommerce.service.PedidoUtils.recalcularTotal;
+import static com.guidev1911.ecommerce.util.PedidoUtils.recalcularTotal;
 
 @Service
 public class PedidoService {

@@ -1,4 +1,4 @@
-package com.guidev1911.ecommerce.service;
+package com.guidev1911.ecommerce.specification;
 
 
 import com.guidev1911.ecommerce.model.Produto;

@@ -1,7 +1,6 @@
 package com.guidev1911.ecommerce.controller;
 
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
-import com.guidev1911.ecommerce.model.Produto;
 import com.guidev1911.ecommerce.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -14,7 +13,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/produtos")
