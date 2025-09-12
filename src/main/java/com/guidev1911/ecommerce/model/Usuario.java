@@ -2,7 +2,9 @@ package com.guidev1911.ecommerce.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,16 +32,20 @@ public class Usuario {
     @Column(nullable = false)
     private Instant criadoEm = Instant.now();
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
+
     public Usuario() {
     }
 
-    public Usuario(Long id, String email, String senha, String nome, Set<Role> roles, Instant criadoEm) {
+    public Usuario(Long id, String email, String senha, String nome, Set<Role> roles, Instant criadoEm, List<Endereco> enderecos) {
         this.id = id;
         this.email = email;
         this.senha = senha;
         this.nome = nome;
         this.roles = roles;
         this.criadoEm = criadoEm;
+        this.enderecos = enderecos;
     }
 
     public Long getId() {
@@ -88,5 +94,13 @@ public class Usuario {
 
     public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public List<Endereco> getEnderecos() {
+        return enderecos;
+    }
+
+    public void setEnderecos(List<Endereco> enderecos) {
+        this.enderecos = enderecos;
     }
 }

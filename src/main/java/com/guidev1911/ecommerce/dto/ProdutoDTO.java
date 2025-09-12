@@ -1,5 +1,10 @@
 package com.guidev1911.ecommerce.dto;
 
+import com.guidev1911.ecommerce.model.FragilidadeProduto;
+import com.guidev1911.ecommerce.model.PesoProduto;
+import com.guidev1911.ecommerce.model.TamanhoProduto;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -21,6 +26,15 @@ public class ProdutoDTO {
     @NotNull(message = "O estoque é obrigatório")
     @Positive(message = "O estoque deve ser maior que zero")
     private Integer estoque;
+
+    @NotNull(message = "Categoria de tamanho é obrigatório")
+    private TamanhoProduto tamanho;
+
+    @NotNull(message = "Categoria de peso é obrigatório")
+    private PesoProduto peso;
+
+    @NotNull(message = "Categoria de fragilidade é obrigatório")
+    private FragilidadeProduto fragilidade;
 
     @NotNull
     private Long categoriaId;
@@ -63,6 +77,30 @@ public class ProdutoDTO {
 
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public TamanhoProduto getTamanho() {
+        return tamanho;
+    }
+
+    public void setTamanho(TamanhoProduto tamanho) {
+        this.tamanho = tamanho;
+    }
+
+    public PesoProduto getPeso() {
+        return peso;
+    }
+
+    public void setPeso(PesoProduto peso) {
+        this.peso = peso;
+    }
+
+    public FragilidadeProduto getFragilidade() {
+        return fragilidade;
+    }
+
+    public void setFragilidade(FragilidadeProduto fragilidade) {
+        this.fragilidade = fragilidade;
     }
 
     public Long getCategoriaId() {

@@ -11,8 +11,9 @@ public class PedidoDTO {
     private BigDecimal total;
     private String status;
     private LocalDateTime criadoEm;
-
     private LocalDateTime expiraEm;
+    private BigDecimal frete;
+    private Long enderecoId;
 
     public Long getId() {
         return id;
@@ -68,5 +69,21 @@ public class PedidoDTO {
 
     public void setExpiraEm(LocalDateTime expiraEm) {
         this.expiraEm = expiraEm;
+    }
+
+    public BigDecimal getFrete() {
+        return frete;
+    }
+
+    public void setFrete(BigDecimal frete) {
+        this.frete = frete;
+    }
+
+    public Long getEnderecoId() {
+        return enderecoId;
+    }
+
+    public void setEnderecoId(Long enderecoId) {
+        this.enderecoId = enderecoId;
     }
 }

@@ -14,6 +14,8 @@ import com.guidev1911.ecommerce.repository.ProdutoRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -39,17 +41,23 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
-    public PedidoDTO criarPedido(Usuario usuario) {
+    public PedidoDTO criarPedido(Usuario usuario, Long enderecoId) {
+
         CarrinhoDTO carrinho = carrinhoService.listarCarrinho(usuario);
 
         if (carrinho.getItens().isEmpty()) {
             throw new CarrinhoVazioException("Carrinho vazio, não é possível criar pedido.");
         }
 
+        Endereco endereco = usuario.getEnderecos().stream()
+                .filter(e -> e.getId().equals(enderecoId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado para este usuário."));
+
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
+        pedido.setEnderecoEntrega(endereco);
         pedido.setStatus(StatusPedido.PENDENTE);
-        pedido.setTotal(recalcularTotal(pedido));
         pedido.setCriadoEm(LocalDateTime.now());
         pedido.setExpiraEm(LocalDateTime.now().plusHours(24));
 
@@ -77,11 +85,72 @@ public class PedidoService {
             pedido.getItens().add(ip);
         }
 
+        BigDecimal frete = calcularFreteSimulado(pedido);
+        pedido.setFrete(frete);
+
+        pedido.setTotal(recalcularTotal(pedido).add(frete));
+
         Pedido salvo = pedidoRepository.save(pedido);
 
         carrinhoService.limparCarrinho(usuario);
 
         return pedidoMapper.toDTO(salvo);
+    }
+
+    private BigDecimal calcularFreteSimulado(Pedido pedido) {
+        BigDecimal freteTotal = BigDecimal.ZERO;
+        BigDecimal fatorEstado = fatorRegiao(pedido.getEnderecoEntrega().getEstado());
+
+        for (ItemPedido item : pedido.getItens()) {
+            Produto p = item.getProduto();
+            BigDecimal freteItem = BigDecimal.ZERO;
+
+            switch (p.getPeso()) {
+                case LEVE -> freteItem = freteItem.add(new BigDecimal("5"));
+                case MEDIO -> freteItem = freteItem.add(new BigDecimal("10"));
+                case PESADO -> freteItem = freteItem.add(new BigDecimal("20"));
+            }
+
+            switch (p.getTamanho()) {
+                case PEQUENO -> freteItem = freteItem.add(new BigDecimal("2"));
+                case MEDIO -> freteItem = freteItem.add(new BigDecimal("5"));
+                case GRANDE -> freteItem = freteItem.add(new BigDecimal("10"));
+                case ENORME -> freteItem = freteItem.add(new BigDecimal("20"));
+            }
+
+            switch (p.getFragilidade()) {
+                case BAIXA -> {}
+                case MEDIA -> freteItem = freteItem.multiply(new BigDecimal("1.2"));
+                case ALTA -> freteItem = freteItem.multiply(new BigDecimal("1.5"));
+            }
+
+            freteItem = freteItem.multiply(BigDecimal.valueOf(item.getQuantidade()))
+                    .multiply(fatorEstado);
+
+            freteTotal = freteTotal.add(freteItem);
+        }
+
+        return freteTotal.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal fatorRegiao(String estadoDestino) {
+        estadoDestino = estadoDestino.toUpperCase();
+
+        List<String> nordeste = List.of("AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE");
+        List<String> sudeste = List.of("ES", "MG", "RJ", "SP");
+        List<String> sul = List.of("PR", "RS", "SC");
+        List<String> centroOeste = List.of("DF", "GO", "MT", "MS");
+        List<String> norte = List.of("AC", "AP", "AM", "PA", "RO", "RR", "TO");
+
+        if (estadoDestino.equals("SE")) return new BigDecimal("1.0");
+
+        if (nordeste.contains(estadoDestino)) return new BigDecimal("1.3");
+        if (sudeste.contains(estadoDestino)) return new BigDecimal("2.5");
+        if (sul.contains(estadoDestino)) return new BigDecimal("3.0");
+        if (centroOeste.contains(estadoDestino)) return new BigDecimal("3.5");
+        if (norte.contains(estadoDestino)) return new BigDecimal("4.5");
+
+        return new BigDecimal("3.0");
     }
 
     public List<PedidoDTO> listarPedidos(Usuario usuario) {

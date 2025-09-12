@@ -37,10 +37,17 @@ public class Pedido {
     @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL)
     private Pagamento pagamento;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "endereco_id")
+    private Endereco enderecoEntrega;
+
+    @Column(precision = 15, scale = 2, nullable = false)
+    private BigDecimal frete = BigDecimal.ZERO;
+
     public Pedido() {
     }
 
-    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm, LocalDateTime expiraEm, LocalDateTime pagoEm, Pagamento pagamento) {
+    public Pedido(Long id, Usuario usuario, List<ItemPedido> itens, BigDecimal total, StatusPedido status, LocalDateTime criadoEm, LocalDateTime expiraEm, LocalDateTime pagoEm, Pagamento pagamento, Endereco enderecoEntrega, BigDecimal frete) {
         this.id = id;
         this.usuario = usuario;
         this.itens = itens;
@@ -50,6 +57,8 @@ public class Pedido {
         this.expiraEm = expiraEm;
         this.pagoEm = pagoEm;
         this.pagamento = pagamento;
+        this.enderecoEntrega = enderecoEntrega;
+        this.frete = frete;
     }
 
     public Long getId() {
@@ -122,5 +131,21 @@ public class Pedido {
 
     public void setPagamento(Pagamento pagamento) {
         this.pagamento = pagamento;
+    }
+
+    public Endereco getEnderecoEntrega() {
+        return enderecoEntrega;
+    }
+
+    public void setEnderecoEntrega(Endereco enderecoEntrega) {
+        this.enderecoEntrega = enderecoEntrega;
+    }
+
+    public BigDecimal getFrete() {
+        return frete;
+    }
+
+    public void setFrete(BigDecimal frete) {
+        this.frete = frete;
     }
 }

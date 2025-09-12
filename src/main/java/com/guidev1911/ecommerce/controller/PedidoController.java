@@ -24,10 +24,14 @@ public class PedidoController {
     }
 
     @PostMapping
-        public ResponseEntity<PedidoDTO> criarPedido(Authentication authentication) {
+    public ResponseEntity<PedidoDTO> criarPedido(
+            Authentication authentication,
+            @RequestParam(name = "enderecoId") Long enderecoId) {
+
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
-        PedidoDTO pedido = pedidoService.criarPedido(usuario);
-        return new ResponseEntity<>(pedido, HttpStatus.CREATED);
+        PedidoDTO pedido = pedidoService.criarPedido(usuario, enderecoId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
 
     @GetMapping

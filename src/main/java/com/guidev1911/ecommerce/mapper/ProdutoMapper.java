@@ -13,10 +13,11 @@ import org.mapstruct.Mapping;
 public interface ProdutoMapper {
 
     ProdutoMapper INSTANCE = Mappers.getMapper(ProdutoMapper.class);
-
+    
     @Mapping(source = "categoria.id", target = "categoriaId")
     ProdutoDTO toDTO(Produto produto);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(source = "categoriaId", target = "categoria")
     Produto toEntity(ProdutoDTO produtoDTO);
 
@@ -32,6 +33,9 @@ public interface ProdutoMapper {
             categoria.setId(dto.getCategoriaId());
             produto.setCategoria(categoria);
         }
+        if (dto.getPeso() != null) produto.setPeso(dto.getPeso());
+        if (dto.getTamanho() != null) produto.setTamanho(dto.getTamanho());
+        if (dto.getFragilidade() != null) produto.setFragilidade(dto.getFragilidade());
     }
 
     default Categoria map(Long categoriaId) {

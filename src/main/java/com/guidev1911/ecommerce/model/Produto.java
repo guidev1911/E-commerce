@@ -36,18 +36,27 @@ public class Produto {
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
+    @Enumerated(EnumType.STRING)
+    private TamanhoProduto tamanho;
+
+    @Enumerated(EnumType.STRING)
+    private PesoProduto peso;
+
+    @Enumerated(EnumType.STRING)
+    private FragilidadeProduto fragilidade;
+
     public Produto() {}
 
-    public Produto(Long id, String nome, String descricao, BigDecimal preco, Integer estoque, Categoria categoria) {
+    public Produto(Long id, String nome, String descricao, BigDecimal preco, Integer estoque, Categoria categoria, TamanhoProduto tamanho, PesoProduto peso, FragilidadeProduto fragilidade) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
         this.estoque = estoque;
         this.categoria = categoria;
-    }
-
-    public Produto(Long produtoId) {
+        this.tamanho = tamanho;
+        this.peso = peso;
+        this.fragilidade = fragilidade;
     }
 
     public Long getId() {
@@ -98,16 +107,40 @@ public class Produto {
         this.categoria = categoria;
     }
 
+    public TamanhoProduto getTamanho() {
+        return tamanho;
+    }
+
+    public void setTamanho(TamanhoProduto tamanho) {
+        this.tamanho = tamanho;
+    }
+
+    public PesoProduto getPeso() {
+        return peso;
+    }
+
+    public void setPeso(PesoProduto peso) {
+        this.peso = peso;
+    }
+
+    public FragilidadeProduto getFragilidade() {
+        return fragilidade;
+    }
+
+    public void setFragilidade(FragilidadeProduto fragilidade) {
+        this.fragilidade = fragilidade;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Produto produto = (Produto) o;
-        return Objects.equals(getId(), produto.getId()) && Objects.equals(getNome(), produto.getNome()) && Objects.equals(getDescricao(), produto.getDescricao()) && Objects.equals(getPreco(), produto.getPreco()) && Objects.equals(getEstoque(), produto.getEstoque()) && Objects.equals(getCategoria(), produto.getCategoria());
+        return Objects.equals(getId(), produto.getId()) && Objects.equals(getNome(), produto.getNome()) && Objects.equals(getDescricao(), produto.getDescricao()) && Objects.equals(getPreco(), produto.getPreco()) && Objects.equals(getEstoque(), produto.getEstoque()) && Objects.equals(getCategoria(), produto.getCategoria()) && getTamanho() == produto.getTamanho() && getPeso() == produto.getPeso() && getFragilidade() == produto.getFragilidade();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getNome(), getDescricao(), getPreco(), getEstoque(), getCategoria());
+        return Objects.hash(getId(), getNome(), getDescricao(), getPreco(), getEstoque(), getCategoria(), getTamanho(), getPeso(), getFragilidade());
     }
 }
