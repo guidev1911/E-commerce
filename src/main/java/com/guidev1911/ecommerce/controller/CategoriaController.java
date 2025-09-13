@@ -1,6 +1,8 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidev1911.ecommerce.dto.CategoriaDTO;
+import com.guidev1911.ecommerce.model.Categoria;
 import com.guidev1911.ecommerce.service.CategoriaService;
 import com.guidev1911.ecommerce.util.ResponseUtil;
 import jakarta.validation.Valid;
@@ -23,7 +25,17 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> criar(@Valid @RequestBody List<CategoriaDTO> dtos) {
+    public ResponseEntity<Object> criar(@Valid @RequestBody Object body) {
+        List<CategoriaDTO> dtos;
+
+        if (body instanceof List<?>) {
+            dtos = ((List<?>) body).stream()
+                    .map(o -> new ObjectMapper().convertValue(o, CategoriaDTO.class))
+                    .toList();
+        } else {
+            dtos = List.of(new ObjectMapper().convertValue(body, CategoriaDTO.class));
+        }
+
         List<CategoriaDTO> criadas = categoriaService.criarVarias(dtos);
         return ResponseUtil.singleOrList(criadas);
     }
