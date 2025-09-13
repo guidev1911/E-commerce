@@ -2,12 +2,15 @@ package com.guidev1911.ecommerce.controller;
 
 import com.guidev1911.ecommerce.dto.CategoriaDTO;
 import com.guidev1911.ecommerce.service.CategoriaService;
+import com.guidev1911.ecommerce.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categorias")
@@ -20,8 +23,9 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoriaDTO> criar(@Valid @RequestBody CategoriaDTO dto) {
-        return new ResponseEntity<>(categoriaService.criar(dto), HttpStatus.CREATED);
+    public ResponseEntity<Object> criar(@Valid @RequestBody List<CategoriaDTO> dtos) {
+        List<CategoriaDTO> criadas = categoriaService.criarVarias(dtos);
+        return ResponseUtil.singleOrList(criadas);
     }
 
     @GetMapping

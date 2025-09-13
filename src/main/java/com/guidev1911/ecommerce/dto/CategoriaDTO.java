@@ -1,7 +1,9 @@
 package com.guidev1911.ecommerce.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 
+@JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 public class CategoriaDTO {
     private Long id;
 
