@@ -1,17 +1,21 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.guidev1911.ecommerce.dto.PedidoCreateDTO;
 import com.guidev1911.ecommerce.dto.PedidoDTO;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.PedidoService;
 import com.guidev1911.ecommerce.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/v1/pedidos")
 public class PedidoController {
 
@@ -26,10 +30,10 @@ public class PedidoController {
     @PostMapping
     public ResponseEntity<PedidoDTO> criarPedido(
             Authentication authentication,
-            @RequestParam(name = "enderecoId") Long enderecoId) {
+            @Valid @RequestBody PedidoCreateDTO dto) {
 
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
-        PedidoDTO pedido = pedidoService.criarPedido(usuario, enderecoId);
+        PedidoDTO pedido = pedidoService.criarPedido(usuario, dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }

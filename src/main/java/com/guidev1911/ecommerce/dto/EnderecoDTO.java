@@ -1,62 +1,32 @@
-package com.guidev1911.ecommerce.model;
+package com.guidev1911.ecommerce.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
-@Entity
-@Table(name = "enderecos")
-public class Endereco {
+public class EnderecoDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
-
+    @NotBlank
     private String logradouro;
+
+    @NotBlank
     private String numero;
+
     private String complemento;
+
+    @NotBlank
     private String bairro;
+
+    @NotBlank
     private String cidade;
+
+    @NotBlank
     private String estado;
+
+    @NotBlank
     private String cep;
-    private String pais;
 
-    private boolean principal;
+    private String pais = "Brasil";
 
-    public Endereco() {
-    }
-
-    public Endereco(Long id, Usuario usuario, String logradouro, String numero, String complemento, String bairro, String cidade, String estado, String cep, String pais, boolean principal) {
-        this.id = id;
-        this.usuario = usuario;
-        this.logradouro = logradouro;
-        this.numero = numero;
-        this.complemento = complemento;
-        this.bairro = bairro;
-        this.cidade = cidade;
-        this.estado = estado;
-        this.cep = cep;
-        this.pais = pais;
-        this.principal = principal;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
+    private boolean principal = true;
 
     public String getLogradouro() {
         return logradouro;
@@ -129,6 +99,4 @@ public class Endereco {
     public void setPrincipal(boolean principal) {
         this.principal = principal;
     }
-
-
 }

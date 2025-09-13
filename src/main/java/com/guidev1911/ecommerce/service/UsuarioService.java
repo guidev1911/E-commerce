@@ -1,11 +1,13 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.AuthResponse;
+import com.guidev1911.ecommerce.dto.EnderecoDTO;
 import com.guidev1911.ecommerce.dto.UserRegisterDTO;
 import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
+import com.guidev1911.ecommerce.model.Endereco;
 import com.guidev1911.ecommerce.model.RefreshToken;
 import com.guidev1911.ecommerce.model.Role;
 import com.guidev1911.ecommerce.model.Usuario;
@@ -42,11 +44,28 @@ public class UsuarioService {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new EmailJaRegistradoException("Email já registrado");
         }
+
         Usuario u = new Usuario();
         u.setEmail(dto.getEmail());
         u.setNome(dto.getNome());
         u.setSenha(passwordEncoder.encode(dto.getSenha()));
         u.getRoles().add(Role.ROLE_USER);
+
+        EnderecoDTO edto = dto.getEndereco();
+        Endereco e = new Endereco();
+        e.setUsuario(u);
+        e.setLogradouro(edto.getLogradouro());
+        e.setNumero(edto.getNumero());
+        e.setComplemento(edto.getComplemento());
+        e.setBairro(edto.getBairro());
+        e.setCidade(edto.getCidade());
+        e.setEstado(edto.getEstado());
+        e.setCep(edto.getCep());
+        e.setPais(edto.getPais());
+        e.setPrincipal(edto.isPrincipal());
+
+        u.getEnderecos().add(e);
+
         return usuarioRepository.save(u);
     }
 

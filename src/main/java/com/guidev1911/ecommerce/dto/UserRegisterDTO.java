@@ -1,18 +1,25 @@
 package com.guidev1911.ecommerce.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UserRegisterDTO {
+
     @Email @NotBlank
     private String email;
 
-    @NotBlank @Size(min = 6, message = "Senha mínima 6 caracteres")
+    @NotBlank @Size(min = 6)
     private String senha;
 
     @NotBlank
     private String nome;
+
+    @NotNull
+    @Valid
+    private EnderecoDTO endereco;
 
     public String getEmail() {
         return email;
@@ -36,5 +43,13 @@ public class UserRegisterDTO {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public EnderecoDTO getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(EnderecoDTO endereco) {
+        this.endereco = endereco;
     }
 }

@@ -2,6 +2,7 @@ package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.CarrinhoDTO;
 import com.guidev1911.ecommerce.dto.ItemCarrinhoDTO;
+import com.guidev1911.ecommerce.dto.PedidoCreateDTO;
 import com.guidev1911.ecommerce.dto.PedidoDTO;
 import com.guidev1911.ecommerce.exception.CancelamentoNaoPermitidoException;
 import com.guidev1911.ecommerce.exception.CarrinhoVazioException;
@@ -41,7 +42,7 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
-    public PedidoDTO criarPedido(Usuario usuario, Long enderecoId) {
+    public PedidoDTO criarPedido(Usuario usuario, PedidoCreateDTO dto) {
 
         CarrinhoDTO carrinho = carrinhoService.listarCarrinho(usuario);
 
@@ -50,7 +51,7 @@ public class PedidoService {
         }
 
         Endereco endereco = usuario.getEnderecos().stream()
-                .filter(e -> e.getId().equals(enderecoId))
+                .filter(e -> e.getId().equals(dto.getEnderecoId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado para este usuário."));
 
