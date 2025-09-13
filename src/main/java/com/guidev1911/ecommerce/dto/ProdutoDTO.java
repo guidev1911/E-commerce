@@ -1,5 +1,6 @@
 package com.guidev1911.ecommerce.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.guidev1911.ecommerce.model.FragilidadeProduto;
 import com.guidev1911.ecommerce.model.PesoProduto;
 import com.guidev1911.ecommerce.model.TamanhoProduto;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
+@JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 public class ProdutoDTO {
     private Long id;
 

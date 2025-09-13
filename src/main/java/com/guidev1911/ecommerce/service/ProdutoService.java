@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class ProdutoService {
@@ -50,12 +51,20 @@ public class ProdutoService {
         return produtoMapper.toDTO(verificarExistencia(id));
     }
 
-    public ProdutoDTO criar(ProdutoDTO produtoDTO) {
-        Categoria categoria = verificarCategoria(produtoDTO.getCategoriaId());
-        Produto produto = produtoMapper.toEntity(produtoDTO);
-        produto.setCategoria(categoria);
-        Produto salvo = produtoRepository.save(produto);
-        return produtoMapper.toDTO(salvo);
+    public List<ProdutoDTO> criarVarios(List<ProdutoDTO> produtosDTO) {
+        List<Produto> entidades = produtosDTO.stream()
+                .map(dto -> {
+                    Produto produto = produtoMapper.toEntity(dto);
+                    produto.setCategoria(verificarCategoria(dto.getCategoriaId()));
+                    return produto;
+                })
+                .toList();
+
+        List<Produto> salvos = produtoRepository.saveAll(entidades);
+
+        return salvos.stream()
+                .map(produtoMapper::toDTO)
+                .toList();
     }
 
     public ProdutoDTO atualizar(Long id, ProdutoDTO produtoDTO) {

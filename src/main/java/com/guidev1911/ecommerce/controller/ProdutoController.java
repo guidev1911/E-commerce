@@ -1,8 +1,10 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.service.ProdutoService;
 
+import com.guidev1911.ecommerce.util.ResponseUtil;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/produtos")
@@ -38,9 +41,19 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoDTO produtoDTO) {
-        ProdutoDTO novo = produtoService.criar(produtoDTO);
-        return new ResponseEntity<>(novo, HttpStatus.CREATED);
+    public ResponseEntity<Object> criar(@Valid @RequestBody Object body) {
+        List<ProdutoDTO> produtosDTO;
+
+        if (body instanceof List<?>) {
+            produtosDTO = ((List<?>) body).stream()
+                    .map(o -> new ObjectMapper().convertValue(o, ProdutoDTO.class))
+                    .toList();
+        } else {
+            produtosDTO = List.of(new ObjectMapper().convertValue(body, ProdutoDTO.class));
+        }
+
+        List<ProdutoDTO> criados = produtoService.criarVarios(produtosDTO);
+        return ResponseUtil.singleOrList(criados);
     }
 
     @PutMapping("/{id}")
