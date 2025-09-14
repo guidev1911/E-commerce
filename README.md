@@ -13,6 +13,8 @@ Este projeto implementa autenticação baseada em **JWT (JSON Web Token)** com s
 **Método:** `POST`
 **URL:** `/auth/register`
 
+Endereço sendo associado ao usuário para posteriormente calcular o frete no pedido
+
 **Body (JSON):**
 
 ```json
@@ -422,6 +424,242 @@ Todos os erros retornam `ApiError` com a estrutura:
 * Paginação em `GET /api/v1/categorias` permite controlar quantas categorias são retornadas por página e ordenação.
 * Atualizações e exclusões só são possíveis se a categoria existir; caso contrário, será lançado um erro 404.
 * O `CategoriaService` encapsula toda a lógica de criação, atualização, busca e exclusão.
+
+# Produtos
+
+Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto ou múltiplos produtos de uma vez**, além de listagem paginada com filtros opcionais.
+
+---
+
+## Endpoints
+
+### Criar produto(s)
+
+**Método:** `POST`
+**URL:** `/api/v1/produtos`
+
+**Body (JSON) — exemplo de 1 produto:**
+
+```json
+{
+  "nome": "Gabinete AIGO c285",
+  "descricao": "gabinete aquário em vidro",
+  "preco": 400.00,
+  "estoque": 50,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+**Body (JSON) — exemplo de lista de produtos:**
+
+```json
+[
+  {
+    "nome": "Gabinete AIGO c285",
+    "descricao": "gabinete aquário em vidro",
+    "preco": 400.00,
+    "estoque": 50,
+    "categoriaId": 8,
+    "peso": "MEDIO",
+    "tamanho": "MEDIO",
+    "fragilidade": "ALTA"
+  },
+  {
+    "nome": "Mouse Gamer XYZ",
+    "descricao": "mouse com DPI ajustável",
+    "preco": 120.00,
+    "estoque": 100,
+    "categoriaId": 8,
+    "peso": "LEVE",
+    "tamanho": "PEQUENO",
+    "fragilidade": "BAIXA"
+  }
+]
+```
+
+**Resposta (201 Created):**
+
+* Retorna o produto criado ou a lista de produtos.
+
+```json
+{
+  "id": 1,
+  "nome": "Gabinete AIGO c285",
+  "descricao": "gabinete aquário em vidro",
+  "preco": 400.00,
+  "estoque": 50,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+```json
+[
+  {"id": 1, "nome": "Gabinete AIGO c285", "descricao": "gabinete aquário em vidro", "preco": 400.00, "estoque": 50, "categoriaId": 8, "peso": "MEDIO", "tamanho": "MEDIO", "fragilidade": "ALTA"},
+  {"id": 2, "nome": "Mouse Gamer XYZ", "descricao": "mouse com DPI ajustável", "preco": 120.00, "estoque": 100, "categoriaId": 8, "peso": "LEVE", "tamanho": "PEQUENO", "fragilidade": "BAIXA"}
+]
+```
+
+---
+
+### Listar produtos com filtros (paginado)
+
+**Método:** `GET`
+**URL:** `/api/v1/produtos`
+
+**Parâmetros todos opcionais:**
+
+* `categoriaId` → filtrar por categoria
+* `precoMin` → preço mínimo
+* `precoMax` → preço máximo
+* `nome` → busca parcial por nome
+* `page`, `size`, `sort` → controle de paginação
+
+**Ex: GET http://localhost:8080/api/v1/produtos?categoriaId=3&precoMin=1000&precoMax=3000&nome=Smartphone (sendo possivel passar 1 ou vários) **
+
+**Resposta (200 OK):**
+
+```json
+{
+  "content": [
+    {"id": 1, "nome": "Gabinete AIGO c285", "descricao": "gabinete aquário em vidro", "preco": 400.00, "estoque": 50, "categoriaId": 8},
+    {"id": 2, "nome": "Mouse Gamer XYZ", "descricao": "mouse com DPI ajustável", "preco": 120.00, "estoque": 100, "categoriaId": 8}
+    ],
+    "pageable": {
+        "pageNumber": 0,
+        "pageSize": 20,
+        "sort": {
+            "empty": true,
+            "unsorted": true,
+            "sorted": false
+        },
+        "offset": 0,
+        "unpaged": false,
+        "paged": true
+    },
+    "last": true,
+    "totalPages": 1,
+    "totalElements": 2,
+    "size": 20,
+    "number": 0,
+    "sort": {
+        "empty": true,
+        "unsorted": true,
+        "sorted": false
+    },
+    "numberOfElements": 2,
+    "first": true,
+    "empty": false
+}
+```
+
+---
+
+### Buscar produto por ID
+
+**Método:** `GET`
+**URL:** `/api/v1/produtos/{id}`
+
+**Resposta (200 OK):**
+
+```json
+{
+  "id": 1,
+  "nome": "Gabinete AIGO c285",
+  "descricao": "gabinete aquário em vidro",
+  "preco": 400.00,
+  "estoque": 50,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+### Atualizar produto
+
+**Método:** `PUT`
+**URL:** `/api/v1/produtos/{id}`
+
+**Body (JSON):**
+
+```json
+{
+  "nome": "Gabinete AIGO c285 Atualizado",
+  "descricao": "Gabinete atualizado",
+  "preco": 450.00,
+  "estoque": 40,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+**Resposta (200 OK):**
+
+```json
+{
+  "id": 1,
+  "nome": "Gabinete AIGO c285 Atualizado",
+  "descricao": "Gabinete atualizado",
+  "preco": 450.00,
+  "estoque": 40,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+### Deletar produto
+
+**Método:** `DELETE`
+**URL:** `/api/v1/produtos/{id}`
+
+**Resposta (204 No Content)** — sem corpo
+
+---
+
+## Erros possíveis
+
+* **404 Not Found** — Produto não encontrado (`ProdutoNaoEncontradoException`) ou Categoria inexistente (`CategoriaNaoEncontradaException`)
+* **400 Bad Request** — Validação de campos obrigatórios usando `@Valid`
+
+**Exemplo 404:**
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Produto com ID 99 não encontrado.",
+  "path": "/api/v1/produtos/99"
+}
+```
+
+**Exemplo 400:**
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "nome: O nome do produto é obrigatório; preco: O preço deve ser maior que zero",
+  "path": "/api/v1/produtos"
+}
+```
+
+---
+
+## Observações importantes
+
+* O endpoint `POST /api/v1/produtos` aceita **objeto único** ou **lista de objetos**. O sistema detecta e cria corretamente todos os registros.
+* A listagem `GET /api/v1/produtos` permite filtros opcionais (`categoriaId`, `precoMin`, `precoMax`, `nome`) e paginação com `Pageable`.
+* Para criar um produto, obrigatoriamente é necessario ter uma categoria para associar.
 
 
 
