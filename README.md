@@ -790,6 +790,279 @@ Este serviço gerencia o carrinho de compras do usuário, permitindo **adicionar
 * Os endpoints aceitam **alterações de quantidade incrementais** ou sobrescritas.
 * O carrinho é **criado automaticamente** para o usuário, se ainda não existir.
 
+# Pedidos
+
+Este módulo gerencia a criação, simulação, listagem e cancelamento de pedidos.
+Possui dois tipos principais de criação de pedido: **simulação (preview)** e **pedido real**.
+
+---
+
+## Endpoints
+
+### Criar pedido real
+
+**Método:** `POST`
+**URL:** `/api/v1/pedidos`
+
+**Body (JSON):**
+
+```json
+{
+  "enderecoId": 1
+}
+```
+
+> O pedido real:
+>
+> * Salva no banco de dados.
+> * Limpa automaticamente o carrinho do usuário.
+> * Calcula frete com base no endereço e nas categorias de peso/tamanho/fragilidade do produto.
+> * Define status `PENDENTE` e expiração em 24h.
+
+**Exemplo de resposta (201 Created):**
+
+```json
+{
+    "id": 4,
+    "usuarioId": 1,
+    "itens": [
+        {
+            "produtoId": 10,
+            "nomeProduto": "Processador AMD Ryzen 5 5600X",
+            "quantidade": 3,
+            "precoUnitario": 1400.00,
+            "subtotal": 4200.00,
+            "peso": "LEVE",
+            "tamanho": "PEQUENO",
+            "fragilidade": "ALTA"
+        }
+    ],
+    "total": 4231.50,
+    "status": "PENDENTE",
+    "criadoEm": "2025-09-15T02:20:11.7173444",
+    "expiraEm": "2025-09-16T02:20:11.7173444",
+    "frete": 31.50,
+    "enderecoId": 1
+}
+```
+
+---
+
+### Simular pedido (preview)
+
+**Método:** `POST`
+**URL:** `/api/v1/pedidos/preview`
+
+**Body (JSON):**
+
+```json
+{
+  "enderecoId": 1
+}
+```
+
+> Retorna um **preview** do pedido sem salvar no banco, útil para calcular frete e conferir itens.
+
+**Exemplo de resposta (200 OK):**
+
+```json
+{
+    "itens": [
+        {
+            "produtoId": 10,
+            "nomeProduto": "Processador AMD Ryzen 5 5600X",
+            "quantidade": 3,
+            "precoUnitario": 1400.00,
+            "subtotal": 4200.00,
+            "peso": "LEVE",
+            "tamanho": "PEQUENO",
+            "fragilidade": "ALTA"
+        }
+    ],
+    "subtotal": 4200.00,
+    "frete": 31.50,
+    "total": 4231.50,
+    "enderecoId": 1
+}
+```
+
+---
+
+### Listar pedidos do usuário
+
+**Método:** `GET`
+**URL:** `/api/v1/pedidos`
+
+**Resposta (200 OK) — lista de pedidos do usuário:**
+
+```json
+[
+  {
+    "id": 4,
+    "usuarioId": 1,
+    "subtotal": 4200.00,
+    "frete": 31.50,
+    "total": 4231.50,
+    "status": "PENDENTE",
+    "criadoEm": "2025-09-15T02:20:11.7173444"
+  },
+  {
+    "id": 3,
+    "usuarioId": 1,
+    "subtotal": 2500.00,
+    "frete": 15.00,
+    "total": 2515.00,
+    "status": "CONCLUIDO",
+    "criadoEm": "2025-09-12T15:30:00"
+  }
+]
+```
+
+---
+
+### Buscar pedido por ID
+
+**Método:** `GET`
+**URL:** `/api/v1/pedidos/{id}`
+
+**Resposta (200 OK):**
+
+```json
+{
+    "id": 4,
+    "usuarioId": 1,
+    "itens": [
+        {
+            "produtoId": 10,
+            "nomeProduto": "Processador AMD Ryzen 5 5600X",
+            "quantidade": 3,
+            "precoUnitario": 1400.00,
+            "subtotal": 4200.00,
+            "peso": "LEVE",
+            "tamanho": "PEQUENO",
+            "fragilidade": "ALTA"
+        }
+    ],
+    "total": 4231.50,
+    "status": "PENDENTE",
+    "criadoEm": "2025-09-15T02:20:11.7173444",
+    "expiraEm": "2025-09-16T02:20:11.7173444",
+    "frete": 31.50,
+    "enderecoId": 1
+}
+```
+
+---
+
+### Cancelar pedido
+
+**Método:** `PUT`
+**URL:** `/api/v1/pedidos/{id}/cancelar`
+
+> Só é possível cancelar pedidos com status `PENDENTE`.
+> Status `ENVIADO`, `CANCELADO`, `EXPIRADO` ou `CONCLUIDO` não podem ser cancelados.
+
+**Resposta (200 OK):**
+
+```json
+{
+  "id": 4,
+  "usuarioId": 1,
+  "status": "CANCELADO",
+  "subtotal": 4200.00,
+  "frete": 31.50,
+  "total": 4231.50
+}
+```
+
+---
+
+## Cálculo de frete
+
+O frete é calculado com base em:
+
+1. **Peso do produto**: LEVE, MEDIO, PESADO.
+2. **Tamanho do produto**: PEQUENO, MEDIO, GRANDE, ENORME.
+3. **Fragilidade do produto**: BAIXA, MEDIA, ALTA.
+4. **Região do endereço** (estado de entrega):
+
+| Região       | Multiplicador |
+| ------------ | ------------- |
+| SE           | 1.0           |
+| Nordeste     | 1.3           |
+| Sudeste      | 2.5           |
+| Sul          | 3.0           |
+| Centro-Oeste | 3.5           |
+| Norte        | 4.5           |
+| Outros       | 3.0           |
+
+> O frete é multiplicado pela quantidade de itens e pelo fator da região.
+
+---
+
+## Erros possíveis
+
+* **400 Bad Request**
+
+  * Carrinho vazio: `"Carrinho vazio, não é possível criar pedido."`
+  * Endereço inválido ou não encontrado
+
+* **404 Not Found**
+
+  * Produto do carrinho não encontrado: `"Produto com ID X não encontrado."`
+
+* **409 Conflict**
+
+  * Tentativa de cancelar pedido em status não permitido
+
+**Exemplo 400:**
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Carrinho vazio, não é possível criar pedido.",
+  "path": "/api/v1/pedidos"
+}
+```
+
+**Exemplo 404:**
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Produto com ID 10 não encontrado.",
+  "path": "/api/v1/pedidos"
+}
+```
+
+**Exemplo 409:**
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "Não é possível cancelar este pedido no status atual: CONCLUIDO",
+  "path": "/api/v1/pedidos/4/cancelar"
+}
+```
+
+---
+
+## Fluxo resumido
+
+1. **Preview** (`/preview`) → simula o pedido, calcula frete e subtotal.
+2. **Criar pedido real** (`POST /pedidos`) → salva no banco e limpa o carrinho.
+3. **Listar pedidos** (`GET /pedidos`) → retorna histórico do usuário.
+4. **Buscar por ID** (`GET /pedidos/{id}`) → retorna detalhes do pedido.
+5. **Cancelar pedido** (`PUT /pedidos/{id}/cancelar`) → muda status para CANCELADO se permitido.
+
+> Pedidos com status `PENDENTE` expiram automaticamente após 24h.
+> Só é possível cancelar um pedido se ainda não foi pago.
+
+
+
 
 
 
