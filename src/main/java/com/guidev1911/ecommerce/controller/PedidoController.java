@@ -2,6 +2,7 @@ package com.guidev1911.ecommerce.controller;
 
 import com.guidev1911.ecommerce.dto.PedidoCreateDTO;
 import com.guidev1911.ecommerce.dto.PedidoDTO;
+import com.guidev1911.ecommerce.dto.PedidoPreviewDTO;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.PedidoService;
 import com.guidev1911.ecommerce.service.UsuarioService;
@@ -36,6 +37,17 @@ public class PedidoController {
         PedidoDTO pedido = pedidoService.criarPedido(usuario, dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+    }
+
+    @PostMapping("/preview")
+    public ResponseEntity<PedidoPreviewDTO> simularPedido(
+            Authentication authentication,
+            @Valid @RequestBody PedidoCreateDTO dto) {
+
+        Usuario usuario = usuarioService.findByEmail(authentication.getName());
+        PedidoPreviewDTO preview = pedidoService.simularPedido(usuario, dto);
+
+        return ResponseEntity.ok(preview);
     }
 
     @GetMapping

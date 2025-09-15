@@ -16,6 +16,9 @@ public class ItemPedidoDTO {
     private TamanhoProduto tamanho;
     private FragilidadeProduto fragilidade;
 
+    public ItemPedidoDTO() {
+    }
+
     public Long getProdutoId() {
         return produtoId;
     }

@@ -1,9 +1,6 @@
 package com.guidev1911.ecommerce.service;
 
-import com.guidev1911.ecommerce.dto.CarrinhoDTO;
-import com.guidev1911.ecommerce.dto.ItemCarrinhoDTO;
-import com.guidev1911.ecommerce.dto.PedidoCreateDTO;
-import com.guidev1911.ecommerce.dto.PedidoDTO;
+import com.guidev1911.ecommerce.dto.*;
 import com.guidev1911.ecommerce.exception.CancelamentoNaoPermitidoException;
 import com.guidev1911.ecommerce.exception.CarrinhoVazioException;
 import com.guidev1911.ecommerce.exception.PedidoNaoEncontradoException;
@@ -42,10 +39,49 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
-    public PedidoDTO criarPedido(Usuario usuario, PedidoCreateDTO dto) {
-
+    public PedidoPreviewDTO simularPedido(Usuario usuario, PedidoCreateDTO dto) {
         CarrinhoDTO carrinho = carrinhoService.listarCarrinho(usuario);
 
+        Pedido pedido = montarPedido(usuario, dto, carrinho);
+
+        BigDecimal subtotal = recalcularTotal(pedido);
+        BigDecimal frete = calcularFreteSimulado(pedido);
+        BigDecimal total = subtotal.add(frete).setScale(2, RoundingMode.HALF_UP);
+
+        List<ItemPedidoDTO> itensPreview = pedido.getItens().stream()
+                .map(pedidoMapper::toItemDTO)
+                .toList();
+
+        return new PedidoPreviewDTO(
+                itensPreview,
+                subtotal.setScale(2, RoundingMode.HALF_UP),
+                frete,
+                total,
+                pedido.getEnderecoEntrega().getId()
+        );
+    }
+
+    public PedidoDTO criarPedido(Usuario usuario, PedidoCreateDTO dto) {
+        CarrinhoDTO carrinho = carrinhoService.listarCarrinho(usuario);
+
+        Pedido pedido = montarPedido(usuario, dto, carrinho);
+
+        BigDecimal frete = calcularFreteSimulado(pedido);
+        pedido.setFrete(frete);
+        pedido.setTotal(recalcularTotal(pedido).add(frete).setScale(2, RoundingMode.HALF_UP));
+
+        pedido.setStatus(StatusPedido.PENDENTE);
+        pedido.setCriadoEm(LocalDateTime.now());
+        pedido.setExpiraEm(LocalDateTime.now().plusHours(24));
+
+        Pedido salvo = pedidoRepository.save(pedido);
+
+        carrinhoService.limparCarrinho(usuario);
+
+        return pedidoMapper.toDTO(salvo);
+    }
+
+    private Pedido montarPedido(Usuario usuario, PedidoCreateDTO dto, CarrinhoDTO carrinho) {
         if (carrinho.getItens().isEmpty()) {
             throw new CarrinhoVazioException("Carrinho vazio, não é possível criar pedido.");
         }
@@ -58,9 +94,6 @@ public class PedidoService {
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setEnderecoEntrega(endereco);
-        pedido.setStatus(StatusPedido.PENDENTE);
-        pedido.setCriadoEm(LocalDateTime.now());
-        pedido.setExpiraEm(LocalDateTime.now().plusHours(24));
 
         List<Long> produtoIds = carrinho.getItens().stream()
                 .map(ItemCarrinhoDTO::getProdutoId)
@@ -86,16 +119,7 @@ public class PedidoService {
             pedido.getItens().add(ip);
         }
 
-        BigDecimal frete = calcularFreteSimulado(pedido);
-        pedido.setFrete(frete);
-
-        pedido.setTotal(recalcularTotal(pedido).add(frete));
-
-        Pedido salvo = pedidoRepository.save(pedido);
-
-        carrinhoService.limparCarrinho(usuario);
-
-        return pedidoMapper.toDTO(salvo);
+        return pedido;
     }
 
     private BigDecimal calcularFreteSimulado(Pedido pedido) {
