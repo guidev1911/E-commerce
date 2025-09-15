@@ -13,7 +13,7 @@ Este projeto implementa autenticação baseada em **JWT (JSON Web Token)** com s
 **Método:** `POST`
 **URL:** `/auth/register`
 
-Endereço sendo associado ao usuário para posteriormente calcular o frete no pedido
+⚠️ **Importante:** endereço sendo associado ao usuário para posteriormente calcular o frete de acordo com o UF, a api identifica a região e calcula o valor do frete.
 
 **Body (JSON):**
 
@@ -440,6 +440,8 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 
 **Body (JSON) — exemplo de 1 produto:**
 
+⚠️ **Importante:**: O porte do produto (peso, tamanho, fragilidade) dado pelo vendedor irá influenciar diretamente no cálculo de frete para envio, junto ao UF cadastrado no endereço do usuário.
+
 ```json
 {
   "nome": "Gabinete AIGO c285",
@@ -520,7 +522,7 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 * `nome` → busca parcial por nome
 * `page`, `size`, `sort` → controle de paginação
 
-**Ex: GET http://localhost:8080/api/v1/produtos?categoriaId=3&precoMin=1000&precoMax=3000&nome=Smartphone (sendo possivel passar 1 ou vários) **
+**Ex: GET http://localhost:8080/api/v1/produtos?categoriaId=3&precoMin=1000&precoMax=3000&nome=Smartphone (sendo possivel passar 1 ou vários)**
 
 **Resposta (200 OK):**
 
@@ -660,6 +662,7 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 * O endpoint `POST /api/v1/produtos` aceita **objeto único** ou **lista de objetos**. O sistema detecta e cria corretamente todos os registros.
 * A listagem `GET /api/v1/produtos` permite filtros opcionais (`categoriaId`, `precoMin`, `precoMax`, `nome`) e paginação com `Pageable`.
 * Para criar um produto, obrigatoriamente é necessario ter uma categoria para associar.
+
 
 
 
