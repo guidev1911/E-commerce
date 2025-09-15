@@ -1062,6 +1062,193 @@ O frete é calculado com base em:
 > Só é possível cancelar um pedido se ainda não foi pago.
 
 
+# Simulação de Pagamento
+
+Este serviço implementa uma **simulação de pagamento** para pedidos do e-commerce. Ele cobre o fluxo de início de pagamento, processamento assíncrono via callback e atualização automática de status do pedido e do pagamento.
+
+---
+
+## Endpoints
+
+### Iniciar pagamento
+
+**POST** `/pagamentos/iniciar/{pedidoId}`
+
+**Parâmetros:**
+
+* `pedidoId` (path) — ID do pedido a ser pago.
+* `metodo` (query) — Método de pagamento (ex.: `CARTAO_CREDITO`, `PIX`, `BOLETO`).
+
+**Exemplo de request:**
+
+```http
+POST /pagamentos/iniciar/4?metodo=CARTAO_CREDITO
+```
+
+**Resposta (200 OK):**
+
+```json
+{
+  "id": 1,
+  "status": "PENDENTE",
+  "metodo": "CARTAO_CREDITO",
+  "valor": 4231.50,
+  "confirmadoEm": 2025-09-14 00:59:13.666932
+}
+```
+
+⚠️ Observações:
+
+* Apenas pedidos com status `PENDENTE` podem iniciar pagamento.
+* O valor do pedido é recalculado automaticamente antes de criar o pagamento.
+* O pagamento inicia como `PENDENTE`.
+
+---
+
+### Callback de pagamento
+
+**POST** `/pagamentos/callback/{pagamentoId}`
+
+**Parâmetros:**
+
+* `pagamentoId` (path) — ID do pagamento.
+* `aprovado` (query) — `true` se o pagamento foi aprovado, `false` caso contrário.
+
+**Exemplo de request:**
+
+```http
+POST /pagamentos/callback/1?aprovado=true
+```
+
+**Descrição:**
+
+* Este endpoint **simula a notificação do processador de pagamento**.
+* Na simulação automática (`simularCallbackAsync`):
+
+  * Um delay aleatório de 3 a 7 segundos é aplicado.
+  * 80% de chance de aprovação do pagamento.
+
+---
+
+## Fluxo do pagamento
+
+1. **Iniciar pagamento**:
+
+   * Cria um objeto `Pagamento` vinculado ao pedido.
+   * Status inicial: `PENDENTE`.
+
+2. **Simulação assíncrona de callback**:
+
+   * Chamado internamente via `@Async simularCallbackAsync`.
+   * Aplica atraso aleatório e decide se o pagamento é aprovado (80% de chance) ou recusado.
+   * Chama `processarCallback`.
+
+3. **Processamento do callback** (`processarCallback`):
+
+   * Se aprovado:
+
+     * Verifica estoque de cada produto do pedido.
+
+       * Se algum produto estiver com estoque insuficiente:
+
+         * Pagamento: `RECUSADO`
+         * Pedido: `CANCELADO`
+     * Se estoque suficiente:
+
+       * Deduz a quantidade dos produtos no estoque.
+       * Atualiza status do pagamento: `APROVADO`
+       * Atualiza status do pedido: `PAGO` e registra `pagoEm`.
+   * Se recusado:
+
+     * Pagamento: `RECUSADO`
+     * Pedido: `CANCELADO`
+
+---
+
+## Status
+
+### Pagamento (`StatusPagamento`)
+
+* `PENDENTE` — criado, aguardando processamento.
+* `APROVADO` — pagamento confirmado com sucesso.
+* `RECUSADO` — pagamento recusado ou falha de estoque.
+
+### Pedido (`StatusPedido`)
+
+* `PENDENTE` — aguardando pagamento.
+* `PAGO` — pagamento aprovado e estoque atualizado.
+* `CANCELADO` — pagamento recusado ou pedido cancelado.
+
+---
+
+## Regras importantes
+
+* Apenas pedidos com status `PENDENTE` podem ser pagos.
+* O sistema verifica **estoque antes de aprovar o pagamento**.
+* Pagamentos são simulados com delay e chance de aprovação aleatória.
+* Toda atualização de status é **transacional** para garantir consistência.
+
+---
+
+## Exemplo de fluxo real
+
+1. Pedido criado:
+
+```json
+{
+  "id": 4,
+  "usuarioId": 1,
+  "itens": [
+    {
+      "produtoId": 10,
+      "nomeProduto": "Processador AMD Ryzen 5 5600X",
+      "quantidade": 3,
+      "precoUnitario": 1400.00,
+      "subtotal": 4200.00,
+      "peso": "LEVE",
+      "tamanho": "PEQUENO",
+      "fragilidade": "ALTA"
+    }
+  ],
+  "total": 4231.50,
+  "status": "PENDENTE",
+  "criadoEm": "2025-09-15T02:20:11.7173444",
+  "expiraEm": "2025-09-16T02:20:11.7173444",
+  "frete": 31.50,
+  "enderecoId": 1
+}
+```
+
+2. Início de pagamento:
+
+```json
+{
+  "id": 1,
+  "status": "PENDENTE",
+  "metodo": "CARTAO_CREDITO",
+  "valor": 4231.50,
+  "confirmadoEm": null
+}
+```
+
+3. Callback aprovado:
+
+```json
+{
+  "id": 1,
+  "status": "APROVADO",
+  "metodo": "CARTAO_CREDITO",
+  "valor": 4231.50,
+  "confirmadoEm": "2025-09-15T02:25:30.123456"
+}
+```
+
+* Pedido atualizado para `PAGO`.
+
+---
+
+
+
 
 
 
