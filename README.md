@@ -663,6 +663,136 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 * A listagem `GET /api/v1/produtos` permite filtros opcionais (`categoriaId`, `precoMin`, `precoMax`, `nome`) e paginação com `Pageable`.
 * Para criar um produto, obrigatoriamente é necessario ter uma categoria para associar.
 
+# Carrinho de Compras
+
+Este serviço gerencia o carrinho de compras do usuário, permitindo **adicionar, atualizar, remover e listar itens**. Cada operação respeita a quantidade em estoque e valida a existência de produtos.
+
+---
+
+## Endpoints
+
+### Adicionar item ao carrinho
+
+**Método:** `POST`
+**URL:** `/api/v1/carrinho/itens`
+
+**Body (JSON):**
+
+```json
+{
+  "produtoId": 1,
+  "quantidade": 2
+}
+```
+* Se o cliente fizer a mesma requisição a quantidade do produto é **somada**.
+
+**Resposta (200 OK):**
+
+```json
+{
+  "usuarioId": 1,
+  "itens": [
+    {
+      "produtoId": 1,
+      "nomeProduto": "Gabinete AIGO c285",
+      "quantidade": 2,
+      "precoUnitario": 400.0,
+      "subtotal": 800.0
+    }
+  ],
+  "total": 800.0
+}
+```
+
+### Atualizar quantidade de um item
+
+**Método:** `PUT`
+**URL:** `/api/v1/carrinho/itens/{produtoId}`
+
+**Body (JSON):**
+
+```json
+{
+  "quantidade": 3
+}
+```
+
+* A quantidade é **sobrescrita** pelo valor enviado.
+
+**Resposta (200 OK):** JSON atualizado do carrinho (mesma estrutura do endpoint de adicionar item).
+
+### Remover item do carrinho
+
+**Método:** `DELETE`
+**URL:** `/api/v1/carrinho/itens/{produtoId}`
+
+**Resposta (200 OK):** JSON atualizado do carrinho após remoção.
+
+### Listar itens do carrinho
+
+**Método:** `GET`
+**URL:** `/api/v1/carrinho`
+
+**Resposta (200 OK):** JSON completo do carrinho, incluindo todos os itens e o total.
+
+---
+
+## Respostas de erro
+
+### 400 Bad Request — Estoque insuficiente
+
+* **`EstoqueInsuficienteException`** → quando a quantidade desejada é maior que o estoque disponível.
+
+**Exemplo:**
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Estoque insuficiente para o produto ID 1. Pedido: 5, Disponível: 3",
+  "path": "/api/v1/carrinho/itens"
+}
+```
+
+### 404 Not Found — Produto ou carrinho não encontrado
+
+* **`ProdutoNaoEncontradoException`** → produto não existe.
+* **`CarrinhoNotFoundException`** → carrinho do usuário não encontrado.
+
+**Exemplo:**
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Produto com ID 10 não encontrado.",
+  "path": "/api/v1/carrinho/itens/10"
+}
+```
+
+* **`CarrinhoVazioException`** (quando aplicável) → caso o carrinho esteja vazio e seja necessário uma validação.
+
+**Exemplo:**
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Carrinho vazio, não é possível criar pedido.",
+  "path": "/api/v1/pedidos"
+}
+```
+
+---
+
+## Observações importantes
+
+* Os endpoints aceitam **alterações de quantidade incrementais** ou sobrescritas.
+* O carrinho é **criado automaticamente** para o usuário, se ainda não existir.
+
+
+
+
 
 
 
