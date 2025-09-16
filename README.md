@@ -627,6 +627,57 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 **Resposta (204 No Content)** — sem corpo
 
 ---
+⚠️ **Importante:** Existe um endpoint `GET api/v1/produtos/classificacao` que retorna uma tabela com tudo que o vendedor precisa saber para classificar seus produtos quando estiver adicionando ao sistemas para ser compatível com o valor do frete, esse endpoint é acessivel apenas com `ROLE_ADMIN` assim como adicionar, atualizar e deletar produtos. Aqui está o exemplo de resposta: 
+```json
+{
+  "TamanhoProduto": [
+    {
+      "categoria": "PEQUENO",
+      "descricao": "Itens pequenos, geralmente até 30cm, exemplo: celular, mouse"
+    },
+    {
+      "categoria": "MEDIO",
+      "descricao": "Itens médios, 30-80cm, exemplo: micro-ondas"
+    },
+    {
+      "categoria": "GRANDE",
+      "descricao": "Itens grandes, 80-150cm, exemplo: bicicleta"
+    },
+    {
+      "categoria": "ENORME",
+      "descricao": "Itens muito grandes, acima de 150cm, exemplo: sofá, geladeira"
+    }
+  ],
+  "PesoProduto": [
+    {
+      "categoria": "LEVE",
+      "descricao": "Até 5kg, exemplo: livros, roupas"
+    },
+    {
+      "categoria": "MEDIO",
+      "descricao": "5kg a 20kg, exemplo: micro-ondas, bagagem média"
+    },
+    {
+      "categoria": "PESADO",
+      "descricao": "Acima de 20kg, exemplo: móveis, equipamentos grandes"
+    }
+  ],
+  "FragilidadeProduto": [
+    {
+      "categoria": "BAIXA",
+      "descricao": "Itens resistentes, exemplo: metal, madeira"
+    },
+    {
+      "categoria": "MEDIA",
+      "descricao": "Itens delicados, exemplo: cerâmica, plástico fino"
+    },
+    {
+      "categoria": "ALTA",
+      "descricao": "Itens muito frágeis, exemplo: vidro, eletrônicos sensíveis"
+    }
+  ]
+}
+```
 
 ## Erros possíveis
 
@@ -1246,6 +1297,7 @@ POST /pagamentos/callback/1?aprovado=true
 * Pedido atualizado para `PAGO`.
 
 ---
+
 
 
 
