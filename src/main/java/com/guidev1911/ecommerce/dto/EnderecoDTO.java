@@ -32,6 +32,21 @@ public class EnderecoDTO {
         return logradouro;
     }
 
+    public EnderecoDTO() {
+    }
+
+    public EnderecoDTO(String logradouro, String numero, String complemento, String bairro, String cidade, String estado, String cep, String pais, boolean principal) {
+        this.logradouro = logradouro;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+        this.cep = cep;
+        this.pais = pais;
+        this.principal = principal;
+    }
+
     public void setLogradouro(String logradouro) {
         this.logradouro = logradouro;
     }
