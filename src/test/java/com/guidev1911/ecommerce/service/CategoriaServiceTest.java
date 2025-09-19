@@ -2,7 +2,6 @@ package com.guidev1911.ecommerce.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.guidev1911.ecommerce.dto.CategoriaDTO;
@@ -59,7 +58,7 @@ class CategoriaServiceTest {
         List<CategoriaDTO> resultado = categoriaService.criarVarias(dtos);
 
         assertEquals(1, resultado.size());
-        assertEquals("Eletrônicos", resultado.get(0).getNome());
+        assertEquals("Eletrônicos", resultado.getFirst().getNome());
         verify(categoriaRepository).saveAll(anyList());
     }
 
@@ -74,7 +73,7 @@ class CategoriaServiceTest {
         Page<CategoriaDTO> resultado = categoriaService.listarTodos(pageable);
 
         assertEquals(1, resultado.getTotalElements());
-        assertEquals("Eletrônicos", resultado.getContent().get(0).getNome());
+        assertEquals("Eletrônicos", resultado.getContent().getFirst().getNome());
     }
 
     @Test
