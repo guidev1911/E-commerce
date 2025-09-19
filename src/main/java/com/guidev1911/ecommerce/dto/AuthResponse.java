@@ -6,6 +6,9 @@ public class AuthResponse {
     private String refreshToken;
     private Long expiresIn;
 
+    public AuthResponse() {
+    }
+
     public AuthResponse(String accessToken, String refreshToken, Long expiresIn) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
