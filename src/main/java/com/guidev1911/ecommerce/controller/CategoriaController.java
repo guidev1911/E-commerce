@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -25,15 +26,18 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> criar(@Valid @RequestBody Object body) {
+    public ResponseEntity<Object> criar(@RequestBody Object body) {
         List<CategoriaDTO> dtos;
 
         if (body instanceof List<?>) {
             dtos = ((List<?>) body).stream()
                     .map(o -> new ObjectMapper().convertValue(o, CategoriaDTO.class))
+                    .peek(this::validarCategoria)
                     .toList();
         } else {
-            dtos = List.of(new ObjectMapper().convertValue(body, CategoriaDTO.class));
+            CategoriaDTO dto = new ObjectMapper().convertValue(body, CategoriaDTO.class);
+            validarCategoria(dto);
+            dtos = List.of(dto);
         }
 
         List<CategoriaDTO> criadas = categoriaService.criarVarias(dtos);
@@ -43,6 +47,18 @@ public class CategoriaController {
     @GetMapping
     public ResponseEntity<Page<CategoriaDTO>> listar(Pageable pageable) {
         return ResponseEntity.ok(categoriaService.listarTodos(pageable));
+    }
+
+    private void validarCategoria(CategoriaDTO dto) {
+        List<String> erros = new ArrayList<>();
+
+        if (dto.getNome() == null || dto.getNome().isBlank()) {
+            erros.add("O nome da categoria é obrigatório.");
+        }
+
+        if (!erros.isEmpty()) {
+            throw new IllegalArgumentException(String.join("; ", erros));
+        }
     }
 
     @GetMapping("/{id}")

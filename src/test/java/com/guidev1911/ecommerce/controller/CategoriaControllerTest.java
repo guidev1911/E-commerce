@@ -1,8 +1,11 @@
 package com.guidev1911.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.guidev1911.ecommerce.dto.CategoriaDTO;
 import com.guidev1911.ecommerce.exception.CategoriaNaoEncontradaException;
+import com.guidev1911.ecommerce.exception.global.GlobalExceptionHandler;
 import com.guidev1911.ecommerce.service.CategoriaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,9 +40,13 @@ class CategoriaControllerTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module());
+
         mockMvc = MockMvcBuilders.standaloneSetup(categoriaController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
         categoriaDTO = new CategoriaDTO();
@@ -47,6 +54,7 @@ class CategoriaControllerTest {
         categoriaDTO.setNome("Informática");
         categoriaDTO.setDescricao("Eletrônicos e computadores");
     }
+
     @Test
     void deveCriarUmaCategoriaSingle() throws Exception {
         when(categoriaService.criarVarias(any())).thenReturn(List.of(categoriaDTO));
@@ -81,19 +89,48 @@ class CategoriaControllerTest {
     }
 
     @Test
-    void deveListarCategoriasPaginadas() throws Exception {
-        CategoriaDTO categoriaDTO = new CategoriaDTO();
-        categoriaDTO.setId(1L);
-        categoriaDTO.setNome("Eletrônicos");
-        categoriaDTO.setDescricao("Categoria de eletrônicos");
+    void deveRetornar400QuandoCategoriaUnicaInvalida() throws Exception {
+        CategoriaDTO dtoInvalida = new CategoriaDTO(); // sem nome
 
-        Page<CategoriaDTO> page = new PageImpl<>(
-                List.of(categoriaDTO),
-                PageRequest.of(0, 10),
-                1
-        );
+        mockMvc.perform(post("/api/v1/categorias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtoInvalida)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("O nome da categoria é obrigatório."));
+    }
+
+    @Test
+    void deveRetornar400QuandoListaCategoriasContemInvalida() throws Exception {
+        CategoriaDTO dtoValida = new CategoriaDTO();
+        dtoValida.setNome("Válida");
+
+        CategoriaDTO dtoInvalida = new CategoriaDTO();
+
+        mockMvc.perform(post("/api/v1/categorias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(dtoValida, dtoInvalida))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("O nome da categoria é obrigatório."));
+    }
+
+    void deveListarCategoriasPaginadas() throws Exception {
+        CategoriaDTO dto = new CategoriaDTO();
+        dto.setId(1L);
+        dto.setNome("Eletrônicos");
+        dto.setDescricao("Categoria de eletrônicos");
+
+        Page<CategoriaDTO> page = new PageImpl<>(List.of(dto), PageRequest.of(0, 10), 1);
 
         when(categoriaService.listarTodos(any(Pageable.class))).thenReturn(page);
+
+        mockMvc = MockMvcBuilders.standaloneSetup(categoriaController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
 
         mockMvc.perform(get("/api/v1/categorias")
                         .param("page", "0")
@@ -103,6 +140,44 @@ class CategoriaControllerTest {
                 .andExpect(jsonPath("$.content[0].id").value(1L))
                 .andExpect(jsonPath("$.content[0].nome").value("Eletrônicos"))
                 .andExpect(jsonPath("$.content[0].descricao").value("Categoria de eletrônicos"));
+
+        verify(categoriaService).listarTodos(any(Pageable.class));
+    }
+
+    @Test
+    void deveListarCategoriasComPaginacao() throws Exception {
+        CategoriaDTO c1 = new CategoriaDTO();
+        c1.setId(1L);
+        c1.setNome("Informática");
+        c1.setDescricao("Produtos de informática");
+
+        CategoriaDTO c2 = new CategoriaDTO();
+        c2.setId(2L);
+        c2.setNome("Escritório");
+        c2.setDescricao("Materiais de escritório");
+
+        Page<CategoriaDTO> page = new PageImpl<>(
+                List.of(c1, c2),
+                PageRequest.of(0, 10),
+                2
+        );
+
+        when(categoriaService.listarTodos(any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/api/v1/categorias")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].nome").value("Informática"))
+                .andExpect(jsonPath("$.content[0].descricao").value("Produtos de informática"))
+                .andExpect(jsonPath("$.content[1].id").value(2))
+                .andExpect(jsonPath("$.content[1].nome").value("Escritório"))
+                .andExpect(jsonPath("$.content[1].descricao").value("Materiais de escritório"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.number").value(0));
 
         verify(categoriaService).listarTodos(any(Pageable.class));
     }
