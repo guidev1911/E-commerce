@@ -174,4 +174,24 @@ class ProdutoServiceTest {
 
         verify(produtoRepository).delete(produto);
     }
+    @Test
+    void deveCriarProdutoUnicoComCategoriaExistente() {
+        when(produtoMapper.toEntity(produtoDTO)).thenReturn(produto);
+        when(categoriaRepository.findById(1L)).thenReturn(Optional.of(categoria));
+        when(produtoRepository.save(produto)).thenReturn(produto);
+        when(produtoMapper.toDTO(produto)).thenReturn(produtoDTO);
+
+        ProdutoDTO resultado = produtoService.criar(produtoDTO);
+
+        assertEquals("Notebook", resultado.getNome());
+        verify(produtoRepository).save(produto);
+    }
+
+    @Test
+    void deveLancarExcecaoAoCriarProdutoUnicoComCategoriaInexistente() {
+        when(produtoMapper.toEntity(produtoDTO)).thenReturn(produto);
+        when(categoriaRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CategoriaNaoEncontradaException.class, () -> produtoService.criar(produtoDTO));
+    }
 }
