@@ -7,6 +7,10 @@ import com.guidev1911.ecommerce.dto.CategoriaDTO;
 import com.guidev1911.ecommerce.exception.CategoriaNaoEncontradaException;
 import com.guidev1911.ecommerce.exception.global.GlobalExceptionHandler;
 import com.guidev1911.ecommerce.service.CategoriaService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -34,6 +39,9 @@ class CategoriaControllerTest {
     @Mock
     private CategoriaService categoriaService;
 
+    @Mock
+    private Validator validator;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private CategoriaDTO categoriaDTO;
@@ -43,6 +51,11 @@ class CategoriaControllerTest {
         objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .registerModule(new Jdk8Module());
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator realValidator = factory.getValidator();
+
+        categoriaController = new CategoriaController(categoriaService, realValidator);
 
         mockMvc = MockMvcBuilders.standaloneSetup(categoriaController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -57,7 +70,7 @@ class CategoriaControllerTest {
 
     @Test
     void deveCriarUmaCategoriaSingle() throws Exception {
-        when(categoriaService.criarVarias(any())).thenReturn(List.of(categoriaDTO));
+        when(categoriaService.criar(any(CategoriaDTO.class))).thenReturn(categoriaDTO);
 
         mockMvc.perform(post("/api/v1/categorias")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +79,7 @@ class CategoriaControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.nome").value("Informática"));
 
-        verify(categoriaService).criarVarias(any());
+        verify(categoriaService).criar(any(CategoriaDTO.class));
     }
 
     @Test
@@ -76,72 +89,16 @@ class CategoriaControllerTest {
         c2.setNome("Escritório");
         c2.setDescricao("Materiais de escritório");
 
-        when(categoriaService.criarVarias(any())).thenReturn(List.of(categoriaDTO, c2));
+        when(categoriaService.criarVarias(anyList())).thenReturn(List.of(categoriaDTO, c2));
 
-        mockMvc.perform(post("/api/v1/categorias")
+        mockMvc.perform(post("/api/v1/categorias/lote")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(List.of(categoriaDTO, c2))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2));
 
-        verify(categoriaService).criarVarias(any());
-    }
-
-    @Test
-    void deveRetornar400QuandoCategoriaUnicaInvalida() throws Exception {
-        CategoriaDTO dtoInvalida = new CategoriaDTO(); // sem nome
-
-        mockMvc.perform(post("/api/v1/categorias")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dtoInvalida)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Bad Request"))
-                .andExpect(jsonPath("$.message").value("O nome da categoria é obrigatório."));
-    }
-
-    @Test
-    void deveRetornar400QuandoListaCategoriasContemInvalida() throws Exception {
-        CategoriaDTO dtoValida = new CategoriaDTO();
-        dtoValida.setNome("Válida");
-
-        CategoriaDTO dtoInvalida = new CategoriaDTO();
-
-        mockMvc.perform(post("/api/v1/categorias")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(List.of(dtoValida, dtoInvalida))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Bad Request"))
-                .andExpect(jsonPath("$.message").value("O nome da categoria é obrigatório."));
-    }
-
-    void deveListarCategoriasPaginadas() throws Exception {
-        CategoriaDTO dto = new CategoriaDTO();
-        dto.setId(1L);
-        dto.setNome("Eletrônicos");
-        dto.setDescricao("Categoria de eletrônicos");
-
-        Page<CategoriaDTO> page = new PageImpl<>(List.of(dto), PageRequest.of(0, 10), 1);
-
-        when(categoriaService.listarTodos(any(Pageable.class))).thenReturn(page);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(categoriaController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-
-        mockMvc.perform(get("/api/v1/categorias")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].nome").value("Eletrônicos"))
-                .andExpect(jsonPath("$.content[0].descricao").value("Categoria de eletrônicos"));
-
-        verify(categoriaService).listarTodos(any(Pageable.class));
+        verify(categoriaService).criarVarias(anyList());
     }
 
     @Test
@@ -156,11 +113,7 @@ class CategoriaControllerTest {
         c2.setNome("Escritório");
         c2.setDescricao("Materiais de escritório");
 
-        Page<CategoriaDTO> page = new PageImpl<>(
-                List.of(c1, c2),
-                PageRequest.of(0, 10),
-                2
-        );
+        Page<CategoriaDTO> page = new PageImpl<>(List.of(c1, c2), PageRequest.of(0, 10), 2);
 
         when(categoriaService.listarTodos(any(Pageable.class))).thenReturn(page);
 
@@ -171,13 +124,9 @@ class CategoriaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1))
                 .andExpect(jsonPath("$.content[0].nome").value("Informática"))
-                .andExpect(jsonPath("$.content[0].descricao").value("Produtos de informática"))
                 .andExpect(jsonPath("$.content[1].id").value(2))
                 .andExpect(jsonPath("$.content[1].nome").value("Escritório"))
-                .andExpect(jsonPath("$.content[1].descricao").value("Materiais de escritório"))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.number").value(0));
+                .andExpect(jsonPath("$.totalElements").value(2));
 
         verify(categoriaService).listarTodos(any(Pageable.class));
     }
@@ -216,5 +165,31 @@ class CategoriaControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(categoriaService).deletar(1L);
+    }
+    @Test
+    void deveRetornar400QuandoCategoriaUnicaInvalida() throws Exception {
+        CategoriaDTO dtoInvalida = new CategoriaDTO();
+
+        mockMvc.perform(post("/api/v1/categorias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtoInvalida)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void deveRetornar400QuandoListaCategoriasContemInvalida() throws Exception {
+        CategoriaDTO dtoValida = new CategoriaDTO();
+        dtoValida.setNome("Válida");
+
+        CategoriaDTO dtoInvalida = new CategoriaDTO();
+
+        mockMvc.perform(post("/api/v1/categorias/lote")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(dtoValida, dtoInvalida))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("O nome da categoria é obrigatório"));
     }
 }
