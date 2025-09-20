@@ -21,14 +21,17 @@ import java.util.List;
 @Service
 public class ProdutoService {
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
+    private final ProdutoRepository produtoRepository;
+    private final CategoriaRepository categoriaRepository;
+    private final ProdutoMapper produtoMapper;
 
-    @Autowired
-    private CategoriaRepository categoriaRepository;
-
-    @Autowired
-    private ProdutoMapper produtoMapper;
+    public ProdutoService(ProdutoRepository produtoRepository,
+                          CategoriaRepository categoriaRepository,
+                          ProdutoMapper produtoMapper) {
+        this.produtoRepository = produtoRepository;
+        this.categoriaRepository = categoriaRepository;
+        this.produtoMapper = produtoMapper;
+    }
 
     public Page<ProdutoDTO> listarFiltrado(
             Long categoriaId,
@@ -49,6 +52,13 @@ public class ProdutoService {
 
     public ProdutoDTO buscarPorId(Long id) {
         return produtoMapper.toDTO(verificarExistencia(id));
+    }
+
+    public ProdutoDTO criar(ProdutoDTO dto) {
+        Produto produto = produtoMapper.toEntity(dto);
+        produto.setCategoria(verificarCategoria(dto.getCategoriaId()));
+        Produto salvo = produtoRepository.save(produto);
+        return produtoMapper.toDTO(salvo);
     }
 
     public List<ProdutoDTO> criarVarios(List<ProdutoDTO> produtosDTO) {
