@@ -1,13 +1,10 @@
 package com.guidev1911.ecommerce.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.service.ProdutoService;
 
-import com.guidev1911.ecommerce.util.ResponseUtil;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
-import jakarta.validation.Validator;
 import jakarta.validation.constraints.Positive;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,9 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Validator;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,10 +27,12 @@ public class ProdutoController {
 
     private final ProdutoService produtoService;
 
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
-    }
+    private final Validator validator;
 
+    public ProdutoController(ProdutoService produtoService, Validator validator) {
+        this.produtoService = produtoService;
+        this.validator = validator;
+    }
     @GetMapping
     public ResponseEntity<Page<ProdutoDTO>> listarTodos(
             @RequestParam(required = false) Long categoriaId,
@@ -53,9 +52,20 @@ public class ProdutoController {
     }
 
     @PostMapping("/lote")
-    public ResponseEntity<List<ProdutoDTO>> criarLote(@Valid @RequestBody List<ProdutoDTO> dtos) {
+    public ResponseEntity<List<ProdutoDTO>> criarLote(@RequestBody List<ProdutoDTO> dtos) {
+        dtos.forEach(this::validarProduto);
         List<ProdutoDTO> criados = produtoService.criarVarios(dtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(criados);
+    }
+
+    private void validarProduto(ProdutoDTO dto) {
+        Set<ConstraintViolation<ProdutoDTO>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            String mensagens = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining("; "));
+            throw new IllegalArgumentException(mensagens);
+        }
     }
 
     @PutMapping("/{id}")
