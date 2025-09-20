@@ -48,6 +48,19 @@ class CategoriaServiceTest {
     }
 
     @Test
+    void deveCriarCategoriaUnica() {
+        when(categoriaMapper.toEntity(dto)).thenReturn(categoria);
+        when(categoriaRepository.save(categoria)).thenReturn(categoria);
+        when(categoriaMapper.toDTO(categoria)).thenReturn(dto);
+
+        CategoriaDTO resultado = categoriaService.criar(dto);
+
+        assertNotNull(resultado);
+        assertEquals("Eletrônicos", resultado.getNome());
+        verify(categoriaRepository).save(categoria);
+    }
+
+    @Test
     void deveCriarVariasCategorias() {
         List<CategoriaDTO> dtos = List.of(dto);
 
@@ -58,7 +71,23 @@ class CategoriaServiceTest {
         List<CategoriaDTO> resultado = categoriaService.criarVarias(dtos);
 
         assertEquals(1, resultado.size());
-        assertEquals("Eletrônicos", resultado.getFirst().getNome());
+        assertEquals("Eletrônicos", resultado.get(0).getNome());
+        verify(categoriaRepository).saveAll(anyList());
+    }
+
+    @Test
+    void deveCriarVariasCategoriasMesmoQueAlgumaSejaInvalidaNoDTO() {
+        CategoriaDTO dtoInvalido = new CategoriaDTO();
+        List<CategoriaDTO> dtos = List.of(dto, dtoInvalido);
+
+        when(categoriaMapper.toEntity(dto)).thenReturn(categoria);
+        when(categoriaMapper.toEntity(dtoInvalido)).thenReturn(new Categoria());
+        when(categoriaRepository.saveAll(anyList())).thenReturn(List.of(categoria, new Categoria()));
+        when(categoriaMapper.toDTO(any())).thenReturn(dto);
+
+        List<CategoriaDTO> resultado = categoriaService.criarVarias(dtos);
+
+        assertEquals(2, resultado.size());
         verify(categoriaRepository).saveAll(anyList());
     }
 
@@ -73,7 +102,7 @@ class CategoriaServiceTest {
         Page<CategoriaDTO> resultado = categoriaService.listarTodos(pageable);
 
         assertEquals(1, resultado.getTotalElements());
-        assertEquals("Eletrônicos", resultado.getContent().getFirst().getNome());
+        assertEquals("Eletrônicos", resultado.getContent().get(0).getNome());
     }
 
     @Test

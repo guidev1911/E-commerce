@@ -5,7 +5,9 @@ import com.guidev1911.ecommerce.dto.CategoriaDTO;
 import com.guidev1911.ecommerce.model.Categoria;
 import com.guidev1911.ecommerce.service.CategoriaService;
 import com.guidev1911.ecommerce.util.ResponseUtil;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,51 +16,47 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/categorias")
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
+    private final Validator validator;
 
-    public CategoriaController(CategoriaService categoriaService) {
+    public CategoriaController(CategoriaService categoriaService, Validator validator) {
         this.categoriaService = categoriaService;
+        this.validator = validator;
     }
 
     @PostMapping
-    public ResponseEntity<Object> criar(@RequestBody Object body) {
-        List<CategoriaDTO> dtos;
+    public ResponseEntity<CategoriaDTO> criar(@Valid @RequestBody CategoriaDTO dto) {
+        CategoriaDTO criada = categoriaService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criada);
+    }
 
-        if (body instanceof List<?>) {
-            dtos = ((List<?>) body).stream()
-                    .map(o -> new ObjectMapper().convertValue(o, CategoriaDTO.class))
-                    .peek(this::validarCategoria)
-                    .toList();
-        } else {
-            CategoriaDTO dto = new ObjectMapper().convertValue(body, CategoriaDTO.class);
-            validarCategoria(dto);
-            dtos = List.of(dto);
-        }
-
+    @PostMapping("/lote")
+    public ResponseEntity<List<CategoriaDTO>> criarLote(@RequestBody List<CategoriaDTO> dtos) {
+        dtos.forEach(this::validarCategoria);
         List<CategoriaDTO> criadas = categoriaService.criarVarias(dtos);
-        return ResponseUtil.singleOrList(criadas);
+        return ResponseEntity.status(HttpStatus.CREATED).body(criadas);
+    }
+
+    private void validarCategoria(CategoriaDTO dto) {
+        Set<ConstraintViolation<CategoriaDTO>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            String mensagens = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining("; "));
+            throw new IllegalArgumentException(mensagens);
+        }
     }
 
     @GetMapping
     public ResponseEntity<Page<CategoriaDTO>> listar(Pageable pageable) {
         return ResponseEntity.ok(categoriaService.listarTodos(pageable));
-    }
-
-    private void validarCategoria(CategoriaDTO dto) {
-        List<String> erros = new ArrayList<>();
-
-        if (dto.getNome() == null || dto.getNome().isBlank()) {
-            erros.add("O nome da categoria é obrigatório.");
-        }
-
-        if (!erros.isEmpty()) {
-            throw new IllegalArgumentException(String.join("; ", erros));
-        }
     }
 
     @GetMapping("/{id}")

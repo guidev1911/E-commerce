@@ -30,6 +30,12 @@ public class CategoriaService {
         this.categoriaMapper = categoriaMapper;
     }
 
+    public CategoriaDTO criar(CategoriaDTO dto) {
+        Categoria categoria = categoriaMapper.toEntity(dto);
+        Categoria salva = categoriaRepository.save(categoria);
+        return categoriaMapper.toDTO(salva);
+    }
+
     public List<CategoriaDTO> criarVarias(List<CategoriaDTO> dtos) {
         List<Categoria> entidades = dtos.stream()
                 .map(categoriaMapper::toEntity)
