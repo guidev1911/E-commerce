@@ -55,4 +55,5 @@ public class CarrinhoController {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
         return ResponseEntity.ok(carrinhoService.listarCarrinho(usuario));
     }
+
 }
