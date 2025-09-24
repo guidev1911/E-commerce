@@ -26,11 +26,43 @@ public class PagamentoDTO {
         this.confirmadoEm = confirmadoEm;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public StatusPagamento getStatus() {
         return status;
     }
 
+    public void setStatus(StatusPagamento status) {
+        this.status = status;
+    }
+
+    public MetodoPagamento getMetodo() {
+        return metodo;
+    }
+
+    public void setMetodo(MetodoPagamento metodo) {
+        this.metodo = metodo;
+    }
+
     public BigDecimal getValor() {
         return valor;
+    }
+
+    public void setValor(BigDecimal valor) {
+        this.valor = valor;
+    }
+
+    public LocalDateTime getConfirmadoEm() {
+        return confirmadoEm;
+    }
+
+    public void setConfirmadoEm(LocalDateTime confirmadoEm) {
+        this.confirmadoEm = confirmadoEm;
     }
 }
