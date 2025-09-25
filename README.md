@@ -232,18 +232,19 @@ Todos os erros seguem a estrutura do `ApiError`:
 
 # Categorias de produtos
 
-Permite gerenciar categorias de produtos em um e-commerce. É possível **adicionar uma única categoria ou uma lista de categorias de uma vez**.
+Permite gerenciar categorias de produtos em um e-commerce.  
+É possível **adicionar uma única categoria** ou **criar várias categorias em lote**.
 
 ---
 
 ## Endpoints
 
-### Criar categoria(s)
+### Criar uma única categoria
 
-**Método:** `POST`
+**Método:** `POST`  
 **URL:** `/api/v1/categorias`
 
-**Body (JSON) — exemplo de 1 categoria:**
+**Body (JSON) — exemplo:**
 
 ```json
 {
@@ -252,7 +253,18 @@ Permite gerenciar categorias de produtos em um e-commerce. É possível **adicio
 }
 ```
 
-**Body (JSON) — exemplo de lista de categorias:**
+**Resposta (201 Created):**
+
+* Retorna a categoria criada.
+
+---
+
+### Criar várias categorias em lote
+
+**Método:** `POST`  
+**URL:** `/api/v1/categorias/lote`
+
+**Body (JSON) — exemplo:**
 
 ```json
 [
@@ -264,24 +276,7 @@ Permite gerenciar categorias de produtos em um e-commerce. É possível **adicio
 
 **Resposta (201 Created):**
 
-* Retorna a categoria criada ou a lista de categorias.
-
-```json
-{
-  "id": 1,
-  "nome": "hardware",
-  "descricao": "peças de computador e periféricos"
-}
-```
-
-```json
-[
-  {"id": 1, "nome": "hardware", "descricao": "peças de computador e periféricos"},
-  {"id": 2, "nome": "software", "descricao": "programas e aplicativos"}
-]
-```
-
----
+* Retorna a lista de categorias criadas.
 
 ### Listar categorias (paginado)
 
@@ -420,10 +415,8 @@ Todos os erros retornam `ApiError` com a estrutura:
 
 ## Observações importantes
 
-* O endpoint `POST /api/v1/categorias` aceita tanto um **objeto único** quanto uma **lista de objetos**. O sistema detecta automaticamente e cria corretamente todos os registros.
 * Paginação em `GET /api/v1/categorias` permite controlar quantas categorias são retornadas por página e ordenação.
 * Atualizações e exclusões só são possíveis se a categoria existir; caso contrário, será lançado um erro 404.
-* O `CategoriaService` encapsula toda a lógica de criação, atualização, busca e exclusão.
 
 # Produtos
 
@@ -1297,6 +1290,7 @@ POST /pagamentos/callback/1?aprovado=true
 * Pedido atualizado para `PAGO`.
 
 ---
+
 
 
 
