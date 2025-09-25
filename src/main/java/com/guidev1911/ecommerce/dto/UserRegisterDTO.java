@@ -17,7 +17,6 @@ public class UserRegisterDTO {
     @NotBlank
     private String nome;
 
-    @NotNull
     @Valid
     private EnderecoDTO endereco;
 

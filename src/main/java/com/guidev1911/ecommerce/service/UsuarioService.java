@@ -7,6 +7,7 @@ import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
+import com.guidev1911.ecommerce.mapper.UsuarioMapper;
 import com.guidev1911.ecommerce.model.Endereco;
 import com.guidev1911.ecommerce.model.RefreshToken;
 import com.guidev1911.ecommerce.model.Role;
@@ -24,15 +25,17 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final UsuarioMapper usuarioMapper;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PasswordEncoder passwordEncoder,
                           JwtTokenProvider jwtProvider,
-                          RefreshTokenService refreshTokenService) {
+                          RefreshTokenService refreshTokenService, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.refreshTokenService = refreshTokenService;
+        this.usuarioMapper = usuarioMapper;
     }
 
     public Usuario findByEmail(String email) {
@@ -45,26 +48,14 @@ public class UsuarioService {
             throw new EmailJaRegistradoException("Email já registrado");
         }
 
-        Usuario u = new Usuario();
-        u.setEmail(dto.getEmail());
-        u.setNome(dto.getNome());
+        Usuario u = usuarioMapper.toEntity(dto);
         u.setSenha(passwordEncoder.encode(dto.getSenha()));
-        u.getRoles().add(Role.ROLE_USER);
 
-        EnderecoDTO edto = dto.getEndereco();
-        Endereco e = new Endereco();
-        e.setUsuario(u);
-        e.setLogradouro(edto.getLogradouro());
-        e.setNumero(edto.getNumero());
-        e.setComplemento(edto.getComplemento());
-        e.setBairro(edto.getBairro());
-        e.setCidade(edto.getCidade());
-        e.setEstado(edto.getEstado());
-        e.setCep(edto.getCep());
-        e.setPais(edto.getPais());
-        e.setPrincipal(edto.isPrincipal());
-
-        u.getEnderecos().add(e);
+        if (dto.getEndereco() != null) {
+            Endereco e = usuarioMapper.toEntity(dto.getEndereco());
+            e.setUsuario(u);
+            u.getEnderecos().add(e);
+        }
 
         return usuarioRepository.save(u);
     }
