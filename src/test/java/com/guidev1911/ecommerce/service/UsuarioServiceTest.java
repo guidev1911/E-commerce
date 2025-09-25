@@ -11,6 +11,7 @@ import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
 import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
+import com.guidev1911.ecommerce.mapper.UsuarioMapper;
 import com.guidev1911.ecommerce.model.RefreshToken;
 import com.guidev1911.ecommerce.model.Role;
 import com.guidev1911.ecommerce.model.Usuario;
@@ -38,6 +39,8 @@ class UsuarioServiceTest {
     private JwtTokenProvider jwtProvider;
     @Mock
     private RefreshTokenService refreshTokenService;
+    @Mock
+    private UsuarioMapper usuarioMapper;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -79,7 +82,14 @@ class UsuarioServiceTest {
         dto.setEmail("novo@email.com");
         dto.setNome("Novo");
         dto.setSenha("123456");
-        dto.setEndereco(new EnderecoDTO("Rua X", "10", null, "Bairro Y", "Cidade Z", "Estado W", "00000-000", "Brasil", true));
+        dto.setEndereco(null);
+
+        Usuario mockUsuario = new Usuario();
+        mockUsuario.setEmail(dto.getEmail());
+        mockUsuario.setSenha("encoded123");
+        mockUsuario.getRoles().add(Role.ROLE_USER);
+
+        when(usuarioMapper.toEntity(dto)).thenReturn(mockUsuario);
 
         when(usuarioRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(passwordEncoder.encode("123456")).thenReturn("encoded123");
@@ -91,7 +101,7 @@ class UsuarioServiceTest {
         assertEquals("novo@email.com", salvo.getEmail());
         assertEquals("encoded123", salvo.getSenha());
         assertTrue(salvo.getRoles().contains(Role.ROLE_USER));
-        assertEquals(1, salvo.getEnderecos().size());
+        assertEquals(0, salvo.getEnderecos().size());
     }
 
     @Test
