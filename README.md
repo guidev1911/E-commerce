@@ -426,14 +426,14 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 
 ## Endpoints
 
-### Criar produto(s)
+### Criar um único produto
 
-**Método:** `POST`
+**Método:** `POST`  
 **URL:** `/api/v1/produtos`
 
-**Body (JSON) — exemplo de 1 produto:**
+⚠️ **Importante:** O porte do produto (peso, tamanho, fragilidade) dado pelo vendedor irá influenciar diretamente no cálculo de frete para envio, junto ao UF cadastrado no endereço do usuário.
 
-⚠️ **Importante:**: O porte do produto (peso, tamanho, fragilidade) dado pelo vendedor irá influenciar diretamente no cálculo de frete para envio, junto ao UF cadastrado no endereço do usuário.
+**Body (JSON) — exemplo:**
 
 ```json
 {
@@ -448,7 +448,30 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 }
 ```
 
-**Body (JSON) — exemplo de lista de produtos:**
+**Resposta (201 Created):**
+
+```json
+{
+  "id": 1,
+  "nome": "Gabinete AIGO c285",
+  "descricao": "gabinete aquário em vidro",
+  "preco": 400.00,
+  "estoque": 50,
+  "categoriaId": 8,
+  "peso": "MEDIO",
+  "tamanho": "MEDIO",
+  "fragilidade": "ALTA"
+}
+```
+
+---
+
+### Criar vários produtos em lote
+
+**Método:** `POST`  
+**URL:** `/api/v1/produtos/lote`
+
+**Body (JSON) — exemplo:**
 
 ```json
 [
@@ -477,30 +500,12 @@ Permite gerenciar produtos em um e-commerce. Suporta **criação de um produto o
 
 **Resposta (201 Created):**
 
-* Retorna o produto criado ou a lista de produtos.
-
-```json
-{
-  "id": 1,
-  "nome": "Gabinete AIGO c285",
-  "descricao": "gabinete aquário em vidro",
-  "preco": 400.00,
-  "estoque": 50,
-  "categoriaId": 8,
-  "peso": "MEDIO",
-  "tamanho": "MEDIO",
-  "fragilidade": "ALTA"
-}
-```
-
 ```json
 [
   {"id": 1, "nome": "Gabinete AIGO c285", "descricao": "gabinete aquário em vidro", "preco": 400.00, "estoque": 50, "categoriaId": 8, "peso": "MEDIO", "tamanho": "MEDIO", "fragilidade": "ALTA"},
   {"id": 2, "nome": "Mouse Gamer XYZ", "descricao": "mouse com DPI ajustável", "preco": 120.00, "estoque": 100, "categoriaId": 8, "peso": "LEVE", "tamanho": "PEQUENO", "fragilidade": "BAIXA"}
 ]
 ```
-
----
 
 ### Listar produtos com filtros (paginado)
 
@@ -1290,6 +1295,7 @@ POST /pagamentos/callback/1?aprovado=true
 * Pedido atualizado para `PAGO`.
 
 ---
+
 
 
 
