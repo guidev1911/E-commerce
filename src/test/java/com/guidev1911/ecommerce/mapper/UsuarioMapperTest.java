@@ -22,6 +22,8 @@ class UsuarioMapperTest {
 
     @Test
     void deveMapearUserRegisterDtoParaUsuario() {
+        Instant antes = Instant.now();
+
         UserRegisterDTO dto = new UserRegisterDTO();
         dto.setEmail("guilherme@example.com");
         dto.setSenha("123456");
@@ -38,11 +40,11 @@ class UsuarioMapperTest {
         rolesEsperadas.add(Role.ROLE_USER);
         assertEquals(rolesEsperadas, usuario.getRoles());
 
-        Instant antes = Instant.now();
         Instant criadoEm = usuario.getCriadoEm();
         Instant depois = Instant.now();
 
-        assertTrue(!criadoEm.isBefore(antes) && !criadoEm.isAfter(depois));
+        assertFalse(criadoEm.isBefore(antes), "criadoEm não deve ser antes de 'antes'");
+        assertFalse(criadoEm.isAfter(depois), "criadoEm não deve ser depois de 'depois'");
 
         assertTrue(usuario.getEnderecos().isEmpty());
     }

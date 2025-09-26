@@ -1,5 +1,6 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.guidev1911.ecommerce.controller.swagger.AuthControllerDoc;
 import com.guidev1911.ecommerce.dto.*;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.UsuarioService;
@@ -12,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements AuthControllerDoc {
 
     private final UsuarioService usuarioService;
 
@@ -21,6 +21,7 @@ public class AuthController {
         this.usuarioService = usuarioService;
     }
 
+    @Override
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserRegisterDTO dto) {
         Usuario saved = usuarioService.register(dto);
@@ -28,12 +29,14 @@ public class AuthController {
                 .body(Map.of("id", saved.getId(), "email", saved.getEmail()));
     }
 
+    @Override
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
         AuthResponse resp = usuarioService.authenticate(req.getEmail(), req.getSenha());
         return ResponseEntity.ok(resp);
     }
 
+    @Override
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@RequestBody Map<String, String> body) {
         String refreshToken = body.get("refreshToken");
@@ -41,6 +44,7 @@ public class AuthController {
         return ResponseEntity.ok(newTokens);
     }
 
+    @Override
     @PutMapping("/me")
     public ResponseEntity<UsuarioDTO> atualizarMe(@Valid @RequestBody UsuarioUpdateDTO dto,
                                                   Authentication authentication) {
@@ -55,11 +59,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<UsuarioDTO> me(Authentication authentication) {
         Usuario usuario = usuarioService.findByEmail(authentication.getName());
         UsuarioDTO dto = new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail());
         return ResponseEntity.ok(dto);
     }
-
 }
