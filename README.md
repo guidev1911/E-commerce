@@ -13,26 +13,13 @@ Este projeto implementa autenticação baseada em **JWT (JSON Web Token)** com s
 **Método:** `POST`
 **URL:** `/auth/register`
 
-⚠️ **Importante:** endereço sendo associado ao usuário para posteriormente calcular o frete de acordo com o UF, a api identifica a região e calcula o valor do frete.
-
 **Body (JSON):**
 
 ```json
 {
   "email": "guilherme@example.com",
   "senha": "123456",
-  "nome": "Guilherme",
-  "endereco": {
-    "logradouro": "Rua das Flores",
-    "numero": "123",
-    "complemento": "Apto 101",
-    "bairro": "Centro",
-    "cidade": "Aracaju",
-    "estado": "SE",
-    "cep": "49000-000",
-    "pais": "Brasil",
-    "principal": true
-  }
+  "nome": "Guilherme"
 }
 ```
 
@@ -229,6 +216,177 @@ Todos os erros seguem a estrutura do `ApiError`:
 3. **Acessar recursos protegidos** → enviar `Authorization: Bearer <accessToken>`.
 4. **Refresh** → troca refresh token válido por novo par (`/auth/refresh`).
 5. **Expiração / rotatividade** → se o refresh token expira ou é reutilizado, o usuário precisa logar novamente.
+
+## Registrar endereço do usuário
+
+**Método:** `POST`
+**URL:** `/usuarios/{usuarioId}/enderecos`
+
+**Body (JSON):**
+
+```json
+{
+  "logradouro": "Rua X",
+  "numero": "123",
+  "complemento": "Apto 1",
+  "bairro": "Centro",
+  "cidade": "Cidade Y",
+  "estado": "Estado Z",
+  "cep": "00000-000",
+  "pais": "Brasil",
+  "principal": true
+}
+```
+
+**Resposta (200 OK):**
+
+```json
+{
+  "logradouro": "Rua X",
+  "numero": "123",
+  "complemento": "Apto 1",
+  "bairro": "Centro",
+  "cidade": "Cidade Y",
+  "estado": "Estado Z",
+  "cep": "00000-000",
+  "pais": "Brasil",
+  "principal": true
+}
+```
+
+---
+
+## Listar endereços do usuário
+
+**Método:** `GET`
+**URL:** `/usuarios/{usuarioId}/enderecos`
+
+**Resposta (200 OK):**
+
+```json
+[
+  {
+    "logradouro": "Rua X",
+    "numero": "123",
+    "complemento": "Apto 1",
+    "bairro": "Centro",
+    "cidade": "Cidade Y",
+    "estado": "Estado Z",
+    "cep": "00000-000",
+    "pais": "Brasil",
+    "principal": true
+  }
+]
+```
+
+---
+
+## Atualizar endereço
+
+**Método:** `PUT`
+**URL:** `/usuarios/{usuarioId}/enderecos/{enderecoId}`
+
+**Body (JSON):**
+
+```json
+{
+  "logradouro": "Rua Y",
+  "numero": "456",
+  "bairro": "Bairro Novo",
+  "cidade": "Cidade Z",
+  "estado": "Estado X",
+  "cep": "11111-111",
+  "pais": "Brasil",
+  "principal": false
+}
+```
+
+**Resposta (200 OK):**
+
+```json
+{
+  "logradouro": "Rua Y",
+  "numero": "456",
+  "bairro": "Bairro Novo",
+  "cidade": "Cidade Z",
+  "estado": "Estado X",
+  "cep": "11111-111",
+  "pais": "Brasil",
+  "principal": false
+}
+```
+
+---
+
+## Deletar endereço
+
+**Método:** `DELETE`
+**URL:** `/usuarios/{usuarioId}/enderecos/{enderecoId}`
+
+**Resposta (204 No Content):**
+
+Sem conteúdo no body.
+
+---
+
+## Observação sobre região e frete
+
+* A **UF** informada no endereço indica a região do usuário.
+* Nossa API identifica a região e calcula o **valor do frete** com base na distância do nosso e-commerce, que está localizado em **Aracaju/SE**.
+* Quanto mais distante a região do usuário, maior será o valor do frete.
+
+---
+
+## Respostas de erro
+
+Todos os erros seguem a estrutura do `ApiError`:
+
+```json
+{
+  "status": <http-status-code>,
+  "error": "<HttpStatus reason>",
+  "message": "<mensagem detalhada>",
+  "path": "<endpoint que causou o erro>"
+}
+```
+
+### 403 Forbidden
+
+* **`EnderecoNaoPertenceAoUsuarioException`**: endereço não pertence ao usuário informado
+
+```json
+{
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Endereço com id 2 não pertence ao usuário com id 1",
+  "path": "/usuarios/1/enderecos/2"
+}
+```
+
+### 404 Not Found
+
+* **`UsuarioNaoEncontradoException`**: usuário não encontrado
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Usuário não encontrado com id: 999",
+  "path": "/usuarios/999/enderecos"
+}
+```
+
+* **`EnderecoNaoEncontradoException`**: endereço não encontrado
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Endereço não encontrado: 999",
+  "path": "/usuarios/1/enderecos/999"
+}
+```
+
 
 # Categorias de produtos
 
@@ -1295,6 +1453,7 @@ POST /pagamentos/callback/1?aprovado=true
 * Pedido atualizado para `PAGO`.
 
 ---
+
 
 
 
