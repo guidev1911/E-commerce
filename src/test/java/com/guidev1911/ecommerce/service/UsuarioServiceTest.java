@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.guidev1911.ecommerce.dto.AuthResponse;
 import com.guidev1911.ecommerce.dto.EnderecoDTO;
 import com.guidev1911.ecommerce.dto.UserRegisterDTO;
+import com.guidev1911.ecommerce.dto.UsuarioUpdateDTO;
 import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
@@ -173,5 +174,50 @@ class UsuarioServiceTest {
 
         assertThrows(RefreshTokenException.class,
                 () -> usuarioService.refreshToken("invalido"));
+    }
+    @Test
+    void deveAtualizarNomeDoUsuarioSemAlterarEmail() {
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Nome Atualizado");
+        dto.setSenha(null);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Usuario atualizado = usuarioService.atualizarUsuario(1L, dto);
+
+        assertNotNull(atualizado);
+        assertEquals("Nome Atualizado", atualizado.getNome());
+        assertEquals("encodedPassword", atualizado.getSenha());
+        assertEquals("teste@email.com", atualizado.getEmail());
+    }
+
+    @Test
+    void deveAtualizarNomeESenhaDoUsuario() {
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Nome Novo");
+        dto.setSenha("novaSenha");
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.encode("novaSenha")).thenReturn("senhaEncoded");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Usuario atualizado = usuarioService.atualizarUsuario(1L, dto);
+
+        assertNotNull(atualizado);
+        assertEquals("Nome Novo", atualizado.getNome());
+        assertEquals("senhaEncoded", atualizado.getSenha());
+        assertEquals("teste@email.com", atualizado.getEmail());
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoUsuarioNaoExistirAoAtualizar() {
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Nome Qualquer");
+
+        when(usuarioRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioNaoEncontradoException.class,
+                () -> usuarioService.atualizarUsuario(999L, dto));
     }
 }
