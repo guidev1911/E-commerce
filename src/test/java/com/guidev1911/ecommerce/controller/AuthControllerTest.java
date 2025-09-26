@@ -2,10 +2,8 @@ package com.guidev1911.ecommerce.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.guidev1911.ecommerce.dto.AuthRequest;
-import com.guidev1911.ecommerce.dto.AuthResponse;
-import com.guidev1911.ecommerce.dto.UserRegisterDTO;
-import com.guidev1911.ecommerce.dto.UsuarioDTO;
+import com.guidev1911.ecommerce.dto.*;
+import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
@@ -111,5 +109,85 @@ class AuthControllerTest {
         assertEquals("teste@email.com", response.getBody().getEmail());
 
         verify(usuarioService).findByEmail("teste@email.com");
+    }
+    @Test
+    void deveAtualizarNomeDoUsuario() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("teste@email.com");
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Nome Atualizado");
+        dto.setSenha(null);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNome("Teste");
+        usuario.setEmail("teste@email.com");
+
+        Usuario usuarioAtualizado = new Usuario();
+        usuarioAtualizado.setId(1L);
+        usuarioAtualizado.setNome("Nome Atualizado");
+        usuarioAtualizado.setEmail("teste@email.com");
+
+        when(usuarioService.findByEmail("teste@email.com")).thenReturn(usuario);
+        when(usuarioService.atualizarUsuario(usuario.getId(), dto)).thenReturn(usuarioAtualizado);
+
+        ResponseEntity<UsuarioDTO> response = authController.atualizarMe(dto, auth);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Nome Atualizado", response.getBody().getNome());
+        assertEquals("teste@email.com", response.getBody().getEmail());
+
+        verify(usuarioService).findByEmail("teste@email.com");
+        verify(usuarioService).atualizarUsuario(usuario.getId(), dto);
+    }
+
+    @Test
+    void deveAtualizarNomeESenhaDoUsuario() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("teste@email.com");
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Nome Novo");
+        dto.setSenha("novaSenha");
+
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNome("Teste");
+        usuario.setEmail("teste@email.com");
+
+        Usuario usuarioAtualizado = new Usuario();
+        usuarioAtualizado.setId(1L);
+        usuarioAtualizado.setNome("Nome Novo");
+        usuarioAtualizado.setEmail("teste@email.com");
+
+        when(usuarioService.findByEmail("teste@email.com")).thenReturn(usuario);
+        when(usuarioService.atualizarUsuario(usuario.getId(), dto)).thenReturn(usuarioAtualizado);
+
+        ResponseEntity<UsuarioDTO> response = authController.atualizarMe(dto, auth);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Nome Novo", response.getBody().getNome());
+        assertEquals("teste@email.com", response.getBody().getEmail());
+
+        verify(usuarioService).findByEmail("teste@email.com");
+        verify(usuarioService).atualizarUsuario(usuario.getId(), dto);
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoUsuarioNaoExistirAoAtualizar() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("naoexiste@email.com");
+
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setNome("Qualquer Nome");
+
+        when(usuarioService.findByEmail("naoexiste@email.com"))
+                .thenThrow(new UsuarioNaoEncontradoException("Usuario não encontrado"));
+
+        assertThrows(UsuarioNaoEncontradoException.class,
+                () -> authController.atualizarMe(dto, auth));
+
+        verify(usuarioService).findByEmail("naoexiste@email.com");
     }
 }
