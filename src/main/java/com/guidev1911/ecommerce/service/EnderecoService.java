@@ -1,6 +1,9 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.EnderecoDTO;
+import com.guidev1911.ecommerce.exception.EnderecoNaoEncontradoException;
+import com.guidev1911.ecommerce.exception.EnderecoNaoPertenceAoUsuarioException;
+import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.EnderecoMapper;
 import com.guidev1911.ecommerce.model.Endereco;
 import com.guidev1911.ecommerce.model.Usuario;
@@ -26,11 +29,10 @@ public class EnderecoService {
         this.usuarioRepository = usuarioRepository;
         this.enderecoMapper = enderecoMapper;
     }
-
     @Transactional
     public EnderecoDTO adicionarEndereco(Long usuarioId, EnderecoDTO dto) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException(usuarioId));
 
         Endereco endereco = enderecoMapper.toEntity(dto);
         endereco.setUsuario(usuario);
@@ -46,7 +48,7 @@ public class EnderecoService {
     @Transactional(readOnly = true)
     public List<EnderecoDTO> listarEnderecos(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new UsuarioNaoEncontradoException(usuarioId));
 
         return enderecoMapper.toDTOList(enderecoRepository.findByUsuario(usuario));
     }
@@ -54,10 +56,10 @@ public class EnderecoService {
     @Transactional
     public EnderecoDTO atualizarEndereco(Long usuarioId, Long enderecoId, EnderecoDTO dto) {
         Endereco endereco = enderecoRepository.findById(enderecoId)
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado"));
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoId));
 
         if (!endereco.getUsuario().getId().equals(usuarioId)) {
-            throw new IllegalArgumentException("Endereço não pertence ao usuário informado");
+            throw new EnderecoNaoPertenceAoUsuarioException(enderecoId, usuarioId);
         }
 
         if (dto.isPrincipal()) {

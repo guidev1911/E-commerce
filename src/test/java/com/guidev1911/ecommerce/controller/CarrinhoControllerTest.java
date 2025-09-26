@@ -139,7 +139,7 @@ class CarrinhoControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Usuário não encontrado: teste@email.com"));
+                .andExpect(jsonPath("$.message").value("Usuário não encontrado com e-mail: teste@email.com"));
 
         verifyNoInteractions(carrinhoService);
     }

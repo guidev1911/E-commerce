@@ -78,6 +78,20 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+    @ExceptionHandler(EnderecoNaoPertenceAoUsuarioException.class)
+    public ResponseEntity<ApiError> handleEnderecoNaoPertenceAoUsuario(
+            EnderecoNaoPertenceAoUsuarioException ex,
+            HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 
     @ExceptionHandler(EmailJaRegistradoException.class)
     public ResponseEntity<ApiError> handleEmailJaRegistrado(EmailJaRegistradoException ex,
