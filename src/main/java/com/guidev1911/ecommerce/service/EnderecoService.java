@@ -35,6 +35,10 @@ public class EnderecoService {
         Endereco endereco = enderecoMapper.toEntity(dto);
         endereco.setUsuario(usuario);
 
+        if (dto.isPrincipal()) {
+            removerPrincipais(usuario);
+        }
+
         Endereco salvo = enderecoRepository.save(endereco);
         return enderecoMapper.toDTO(salvo);
     }
@@ -56,15 +60,11 @@ public class EnderecoService {
             throw new IllegalArgumentException("Endereço não pertence ao usuário informado");
         }
 
-        endereco.setLogradouro(dto.getLogradouro());
-        endereco.setNumero(dto.getNumero());
-        endereco.setComplemento(dto.getComplemento());
-        endereco.setBairro(dto.getBairro());
-        endereco.setCidade(dto.getCidade());
-        endereco.setEstado(dto.getEstado());
-        endereco.setCep(dto.getCep());
-        endereco.setPais(dto.getPais());
-        endereco.setPrincipal(dto.isPrincipal());
+        if (dto.isPrincipal()) {
+            removerPrincipais(endereco.getUsuario());
+        }
+
+        enderecoMapper.updateEntityFromDto(dto, endereco);
 
         return enderecoMapper.toDTO(enderecoRepository.save(endereco));
     }
@@ -79,5 +79,15 @@ public class EnderecoService {
         }
 
         enderecoRepository.delete(endereco);
+    }
+
+    private void removerPrincipais(Usuario usuario) {
+        List<Endereco> enderecos = enderecoRepository.findByUsuario(usuario);
+        for (Endereco e : enderecos) {
+            if (e.isPrincipal()) {
+                e.setPrincipal(false);
+            }
+        }
+        enderecoRepository.saveAll(enderecos);
     }
 }
