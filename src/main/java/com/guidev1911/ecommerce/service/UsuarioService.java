@@ -1,8 +1,8 @@
 package com.guidev1911.ecommerce.service;
 
 import com.guidev1911.ecommerce.dto.AuthResponse;
-import com.guidev1911.ecommerce.dto.EnderecoDTO;
 import com.guidev1911.ecommerce.dto.UserRegisterDTO;
+import com.guidev1911.ecommerce.dto.UsuarioUpdateDTO;
 import com.guidev1911.ecommerce.exception.CredenciaisInvalidasException;
 import com.guidev1911.ecommerce.exception.EmailJaRegistradoException;
 import com.guidev1911.ecommerce.exception.RefreshTokenException;
@@ -10,11 +10,11 @@ import com.guidev1911.ecommerce.exception.UsuarioNaoEncontradoException;
 import com.guidev1911.ecommerce.mapper.UsuarioMapper;
 import com.guidev1911.ecommerce.model.Endereco;
 import com.guidev1911.ecommerce.model.RefreshToken;
-import com.guidev1911.ecommerce.model.Role;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.repository.UsuarioRepository;
 import com.guidev1911.ecommerce.security.JwtTokenProvider;
 import com.guidev1911.ecommerce.security.RefreshTokenService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -85,6 +85,19 @@ public class UsuarioService {
         String accessToken = jwtProvider.generateAccessToken(usuario.getEmail());
 
         return new AuthResponse(accessToken, newRefreshToken.getToken(), jwtProvider.getAccessTokenExpiryMs());
+    }
+    @Transactional
+    public Usuario atualizarUsuario(Long usuarioId, UsuarioUpdateDTO dto) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException(usuarioId));
+
+        usuario.setNome(dto.getNome());
+
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        return usuarioRepository.save(usuario);
     }
 
 }

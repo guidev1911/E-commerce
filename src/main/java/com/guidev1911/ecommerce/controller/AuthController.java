@@ -1,9 +1,6 @@
 package com.guidev1911.ecommerce.controller;
 
-import com.guidev1911.ecommerce.dto.AuthRequest;
-import com.guidev1911.ecommerce.dto.AuthResponse;
-import com.guidev1911.ecommerce.dto.UserRegisterDTO;
-import com.guidev1911.ecommerce.dto.UsuarioDTO;
+import com.guidev1911.ecommerce.dto.*;
 import com.guidev1911.ecommerce.model.Usuario;
 import com.guidev1911.ecommerce.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -42,6 +39,20 @@ public class AuthController {
         String refreshToken = body.get("refreshToken");
         AuthResponse newTokens = usuarioService.refreshToken(refreshToken);
         return ResponseEntity.ok(newTokens);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UsuarioDTO> atualizarMe(@Valid @RequestBody UsuarioUpdateDTO dto,
+                                                  Authentication authentication) {
+        Usuario usuario = usuarioService.findByEmail(authentication.getName());
+        Usuario atualizado = usuarioService.atualizarUsuario(usuario.getId(), dto);
+
+        UsuarioDTO response = new UsuarioDTO();
+        response.setId(atualizado.getId());
+        response.setNome(atualizado.getNome());
+        response.setEmail(atualizado.getEmail());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
