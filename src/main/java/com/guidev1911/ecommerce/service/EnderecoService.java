@@ -74,10 +74,10 @@ public class EnderecoService {
     @Transactional
     public void deletarEndereco(Long usuarioId, Long enderecoId) {
         Endereco endereco = enderecoRepository.findById(enderecoId)
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado"));
+                .orElseThrow(() -> new EnderecoNaoEncontradoException(enderecoId));
 
         if (!endereco.getUsuario().getId().equals(usuarioId)) {
-            throw new IllegalArgumentException("Endereço não pertence ao usuário informado");
+            throw new EnderecoNaoPertenceAoUsuarioException(enderecoId, usuarioId);
         }
 
         enderecoRepository.delete(endereco);
