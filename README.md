@@ -231,7 +231,7 @@ Todos os erros seguem a estrutura do `ApiError`:
   "complemento": "Apto 1",
   "bairro": "Centro",
   "cidade": "Cidade Y",
-  "estado": "Estado Z",
+  "estado": "SE",
   "cep": "00000-000",
   "pais": "Brasil",
   "principal": true
@@ -247,7 +247,7 @@ Todos os erros seguem a estrutura do `ApiError`:
   "complemento": "Apto 1",
   "bairro": "Centro",
   "cidade": "Cidade Y",
-  "estado": "Estado Z",
+  "estado": "SE",
   "cep": "00000-000",
   "pais": "Brasil",
   "principal": true
@@ -271,7 +271,7 @@ Todos os erros seguem a estrutura do `ApiError`:
     "complemento": "Apto 1",
     "bairro": "Centro",
     "cidade": "Cidade Y",
-    "estado": "Estado Z",
+    "estado": "SE",
     "cep": "00000-000",
     "pais": "Brasil",
     "principal": true
@@ -294,7 +294,7 @@ Todos os erros seguem a estrutura do `ApiError`:
   "numero": "456",
   "bairro": "Bairro Novo",
   "cidade": "Cidade Z",
-  "estado": "Estado X",
+  "estado": "SE",
   "cep": "11111-111",
   "pais": "Brasil",
   "principal": false
@@ -309,7 +309,7 @@ Todos os erros seguem a estrutura do `ApiError`:
   "numero": "456",
   "bairro": "Bairro Novo",
   "cidade": "Cidade Z",
-  "estado": "Estado X",
+  "estado": "SE",
   "cep": "11111-111",
   "pais": "Brasil",
   "principal": false
@@ -331,7 +331,7 @@ Sem conteúdo no body.
 
 ## Observação sobre região e frete
 
-* A **UF** informada no endereço indica a região do usuário.
+* A **UF** informada no campo estado indica a região do usuário.
 * Nossa API identifica a região e calcula o **valor do frete** com base na distância do nosso e-commerce, que está localizado em **Aracaju/SE**.
 * Quanto mais distante a região do usuário, maior será o valor do frete.
 
@@ -1453,6 +1453,7 @@ POST /pagamentos/callback/1?aprovado=true
 * Pedido atualizado para `PAGO`.
 
 ---
+
 
 
 
