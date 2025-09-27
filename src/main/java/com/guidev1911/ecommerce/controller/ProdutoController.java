@@ -1,5 +1,6 @@
 package com.guidev1911.ecommerce.controller;
 
+import com.guidev1911.ecommerce.controller.swagger.ProdutoControllerDoc;
 import com.guidev1911.ecommerce.dto.ProdutoDTO;
 import com.guidev1911.ecommerce.service.ProdutoService;
 
@@ -21,38 +22,31 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/produtos")
 @Validated
-public class ProdutoController {
+public class ProdutoController implements ProdutoControllerDoc {
 
     private final ProdutoService produtoService;
-
     private final Validator validator;
 
     public ProdutoController(ProdutoService produtoService, Validator validator) {
         this.produtoService = produtoService;
         this.validator = validator;
     }
-    @GetMapping
-    public ResponseEntity<Page<ProdutoDTO>> listarTodos(
-            @RequestParam(required = false) Long categoriaId,
-            @RequestParam(required = false) BigDecimal precoMin,
-            @RequestParam(required = false) BigDecimal precoMax,
-            @RequestParam(required = false) String nome,
-            Pageable pageable) {
 
+    @Override
+    public ResponseEntity<Page<ProdutoDTO>> listarTodos(Long categoriaId, BigDecimal precoMin, BigDecimal precoMax, String nome, Pageable pageable) {
         Page<ProdutoDTO> produtos = produtoService.listarFiltrado(categoriaId, precoMin, precoMax, nome, pageable);
         return ResponseEntity.ok(produtos);
     }
 
-    @PostMapping
-    public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoDTO dto) {
+    @Override
+    public ResponseEntity<ProdutoDTO> criar(@Valid ProdutoDTO dto) {
         ProdutoDTO criado = produtoService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
-    @PostMapping("/lote")
-    public ResponseEntity<List<ProdutoDTO>> criarLote(@RequestBody List<ProdutoDTO> dtos) {
+    @Override
+    public ResponseEntity<List<ProdutoDTO>> criarLote(List<ProdutoDTO> dtos) {
         dtos.forEach(this::validarProduto);
         List<ProdutoDTO> criados = produtoService.criarVarios(dtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(criados);
@@ -68,12 +62,20 @@ public class ProdutoController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> atualizar(
-            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id,
-            @Valid @RequestBody ProdutoDTO produtoDTO) {
+    @Override
+    public ResponseEntity<ProdutoDTO> atualizar(@Positive Long id, @Valid ProdutoDTO produtoDTO) {
         ProdutoDTO atualizado = produtoService.atualizar(id, produtoDTO);
         return ResponseEntity.ok(atualizado);
+    }
+    @Override
+    public ResponseEntity<ProdutoDTO> buscarPorId(@Positive Long id) {
+        return ResponseEntity.ok(produtoService.buscarPorId(id));
+    }
+
+    @Override
+    public ResponseEntity<Void> deletar(@Positive Long id) {
+        produtoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
     @GetMapping("/classificacao")
     public Map<String, List<Map<String, String>>> getDimensoesEPesos() {
@@ -102,18 +104,5 @@ public class ProdutoController {
                 "PesoProduto", pesos,
                 "FragilidadeProduto", fragilidade
         );
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> buscarPorId(
-            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id) {
-        return ResponseEntity.ok(produtoService.buscarPorId(id));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable @Positive(message = "O ID deve ser maior que zero") Long id) {
-        produtoService.deletar(id);
-        return ResponseEntity.noContent().build();
-    }
+        }
 }
