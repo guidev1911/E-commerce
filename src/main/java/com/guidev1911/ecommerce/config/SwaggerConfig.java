@@ -6,6 +6,10 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+
 @Configuration
 public class SwaggerConfig {
 
@@ -15,7 +19,15 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API E-commerce")
                         .version("1.0")
-                        .description("API RESTful de gerenciamento de produtos, usando Spring Boot, DTOs e MapStruct"));
+                        .description("API RESTful de gerenciamento de produtos, usando Spring Boot, DTOs e MapStruct"))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth",
+                                new SecurityScheme()
+                                        .name("Authorization")
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")));
     }
 
     @Bean
