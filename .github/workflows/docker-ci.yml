@@ -10,9 +10,6 @@ jobs:
     services:
       docker:
         image: docker:dind
-        privileged: true
-        ports:
-          - 2375:2375
         options: >-
           --privileged
           --health-cmd "docker info"
@@ -48,3 +45,4 @@ jobs:
 
       - name: Push da imagem
         run: docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce:latest
+
