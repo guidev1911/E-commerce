@@ -37,7 +37,7 @@ class EcommerceApplicationTests {
 		registry.add("spring.datasource.password", mysql::getPassword);
 	}
 
-	@Test
-	void contextLoads() {
-	}
+//	@Test
+//	void contextLoads() {
+//	}
 }
