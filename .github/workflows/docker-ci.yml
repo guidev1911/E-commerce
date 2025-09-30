@@ -3,7 +3,7 @@ name: CI/CD Docker Hub
 on:
   push:
     branches: ["main"]
-  workflow_dispatch:  # Permite rodar manualmente
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -17,6 +17,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    env:
+      DOCKER_HOST: tcp://localhost:2375
+      DOCKER_TLS_VERIFY: 0
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +33,11 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build e Testes
-        run: ./mvnw clean verify
+        run: ./mvnw clean verify -X
+
+      - name: Listar testes que falharam
+        if: failure()
+        run: grep -H "Error" target/surefire-reports/*.txt || true
 
   build-and-push:
     runs-on: ubuntu-latest
