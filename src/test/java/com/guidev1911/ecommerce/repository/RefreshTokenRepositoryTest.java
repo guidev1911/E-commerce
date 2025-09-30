@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.MySQLContainer;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -30,7 +31,8 @@ class RefreshTokenRepositoryTest {
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withStartupTimeout(Duration.ofMinutes(5));
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;

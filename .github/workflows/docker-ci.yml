@@ -8,18 +8,6 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    services:
-      docker:
-        image: docker:dind
-        options: >-
-          --privileged
-          --health-cmd "docker info"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DOCKER_HOST: tcp://localhost:2375
-      DOCKER_TLS_VERIFY: 0
     steps:
       - uses: actions/checkout@v4
 
@@ -45,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Java (mesma versão que nos testes)
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -60,7 +48,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build da imagem (sem rodar testes de novo)
+      - name: Build da imagem
         run: ./mvnw clean package -DskipTests && docker build -t ${{ secrets.DOCKER_USERNAME }}/ecommerce:latest .
 
       - name: Push da imagem
