@@ -21,7 +21,7 @@ services:
 
   app:
     build: .
-    container_name: Ecommerce
+    container_name: ecommerce
     depends_on:
       mysql:
         condition: service_healthy
@@ -30,5 +30,16 @@ services:
     ports:
       - "8080:8080"
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 volumes:
   mysql_data:
+  portainer_data:
